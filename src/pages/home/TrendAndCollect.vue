@@ -96,7 +96,7 @@ onMounted(()=>{
   position: absolute;
   padding: 1rem;
   z-index: 5;
-  top: 5rem;
+  top: 2.5rem;
   right: -9rem;
   border-radius: 20px;
 }

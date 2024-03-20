@@ -36,8 +36,8 @@
             </div>
           </div>
           <div class="recommend-area" v-else>
-            <div v-for="(item, index) in recommendData" :key="index" class="recommend-content flex-based-container">
-              <div>{{item}}</div>
+            <div v-for="(item, index) in highLightRecData" :key="index" class="recommend-content flex-based-container">
+              <p v-html="item" style="font-weight: 500; font-size: 1.1rem;"></p>
             </div>
           </div>
         </div>
@@ -45,8 +45,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref, defineProps, computed } from "vue"
+import { onMounted, ref, toRaw, defineProps, computed } from "vue"
 import { useSearchKeys } from "@/store/searchKeys"
+import { highlight } from "@/static/highlight"
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const keywordsStore = useSearchKeys()
@@ -68,6 +69,11 @@ const props = defineProps({
     default: ['hello', 'world']
   }
 })
+const recommendData = computed({
+  get:function(){
+    return props.recommendData
+  }
+})
 const isInputFlag = computed({ // 当前是否已经输入
   get:function(){
     return props.isInput
@@ -78,9 +84,17 @@ const realKeyword = computed({ // 实时传递的keyword
     return props.keyword
   }
 })  
-const recommendData = computed({
+const highLightRecData = computed({
   get:function(){
-    return props.recommendData
+    let data = []
+    const recData = recommendData.value
+    if(Array.isArray(recData) && realKeyword.value) {
+      recData.forEach(item => {
+        const text_each = highlight(realKeyword.value, item)
+        data.push(text_each)  
+      })
+    }
+    return data
   }
 })
 // 热点测试
@@ -192,6 +206,7 @@ const deletHistoryItem = (type, id) => { // type：0是单独，1是所有
   padding: 0.2rem 0.8rem;
   border-radius: 10px;
   margin-right: 0.5rem;
+  margin-bottom: 0.3rem;
   cursor: pointer;
   p {
     color: #ffffff;

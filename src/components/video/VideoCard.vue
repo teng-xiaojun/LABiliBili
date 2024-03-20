@@ -94,7 +94,6 @@ const turnToDetail = () => {
             videoId: videoOverview.value.id,
         },
         query: {  
-            videoUrl: videoOverview.value.url,
             upId: videoOverview.value.authorId,
         }
     })

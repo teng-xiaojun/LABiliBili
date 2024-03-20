@@ -35,9 +35,9 @@
           :src="userAvatar" />
           <template #dropdown>
             <el-dropdown-menu><!--NOTE html:  <DropdownMenu slot="list"> -->
-              <!-- <el-dropdown-item v-if="isLogin" command="userCenter">个人中心</el-dropdown-item>
-              <el-dropdown-item v-if="isLogin" command="message">我的消息</el-dropdown-item> -->
-              <el-dropdown-item>(oﾟvﾟ)ノ</el-dropdown-item> <!--v-else-->
+              <el-dropdown-item v-if="isLogin" command="userCenter">个人中心</el-dropdown-item>
+              <el-dropdown-item v-if="isLogin" command="message">我的消息</el-dropdown-item>
+              <el-dropdown-item v-else>(oﾟvﾟ)ノ</el-dropdown-item> <!--v-else-->
               <el-dropdown-item command="logout" divided>
                 <p v-if="isLogin">退出</p>
                 <p v-else>登录</p>
@@ -51,12 +51,12 @@
     <!--内容-->
     <div class="content">
       <!-- NOTE Vue的router-view的v-slot特殊语法，允许从路由视图获得组件Component并渲染-->
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{ Component, route }" :key="$route.fullPath" >
         <!--NOTE 使用 Vue 的过渡效果，通过 <transition> 组件包裹 <keep-alive> 和 <component> 元素，以实现路由切换时的动画效果-->
         <Transition name = "move" mode="out-in">
           <!--XXX 涉及到频繁切换主页，试试-->
           <keep-alive>
-            <component :is="Component"></component>
+            <component :is="Component" :key="route.path"></component>
           </keep-alive>
         </Transition>
       </router-view> 
@@ -90,7 +90,7 @@ const userAvatar =  ref(require("@/assets/img/user/black_user.jpeg"))
 const router = useRouter()
 const refreshTokenStore = useRefreshToken()
 const isLogin = refreshTokenStore.getData()!=='' &&  refreshTokenStore.getData() ? true: false
-const titleFunc = ["首页", "论坛", "直播", "商城"]
+const titleFunc = ["首页"] // "论坛", "直播", "商城"
 /**
  * 点击回到顶端
  */
@@ -238,7 +238,7 @@ onMounted(async()=>{
   }
   .header .title-link {
     margin-left: 0.5rem;
-    // display: flex;
+    display: flex;
   }  
 }
 .header .person-center{

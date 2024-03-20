@@ -2,6 +2,7 @@ import { createApp, watch } from 'vue'
 import { createPinia } from 'pinia'
 import { validateToken } from "@/api/login"
 import { useRefreshToken } from './store/token' // 长短token的使用
+import 'element-plus/dist/index.css'
 import request from "@/api/index.js"
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import ElementPlus from 'element-plus'

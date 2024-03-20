@@ -1,6 +1,6 @@
   <template>
+    <el-aside>
     <el-menu
-      class="common-sidebar"
       :default-active="onRoutes"
       :collapse="collapse"
       background-color="rgba(94,73,238,1)"
@@ -12,18 +12,17 @@
       <template v-for="(item,index) in items" :key="index"
         ><!--NOTE v-for没有key属性会报错-->
         <template v-if="item.subs">
-          <el-sub-menu v-if="item.permiss" :index="item.index">
+          <el-sub-menu v-if="item.permiss" :index="item.index" popper-class="el-popuper">
             <template #title><!--NOTE template不会渲染元素而是包装，#/slot是命名插槽、可以控制特定内容-->
-              <el-icon style="margin-top: 0.1rem; margin-left: 0.1rem">
+              <el-icon class="main-icon">
                 <component :is="item.icon"></component>
               </el-icon>
-              <span>{{ item.title }}</span>
+              <span v-if="!collapse">{{ item.title }}</span>
             </template>
             <el-menu-item v-for="(subItem, index_) in item.subs" :key="index_"
               :index="subItem.index"
-              style="width: 7.8rem; height: 1.8rem; font-size: 1.2rem !important"
             >
-              <div v-if="subItem.permiss">{{ subItem.title }}</div>
+              <div v-if="subItem.permiss" class="main-title">{{ subItem.title }}</div>
             </el-menu-item>
           </el-sub-menu>
         </template>
@@ -35,11 +34,12 @@
             <el-icon>
               <component :is="item.icon"></component>
             </el-icon>
-            <template #title>{{ item.title }}</template>
+            <p v-if="!collapse">{{ item.title }}</p>
           </el-menu-item>
         </template>
       </template>
     </el-menu>
+  </el-aside>
   </template>
 
 <script setup>
@@ -55,15 +55,21 @@ const props = defineProps({
     type: Object,
     required: true,
     default: undefined
+  },
+  isCollapseVal: {
+    type: Boolean,
+    required: false,
+    default: true
   }
 })
 const route = useRoute()
-const id = props.id
 const items = props.menuConfig
 const onRoutes = computed(() => {
   return route.path;
 });
-const collapse = ref(true); // 默认展开
+const collapse = computed(() =>{
+  return props.isCollapseVal
+})
 </script>
 
 <style lang="scss">

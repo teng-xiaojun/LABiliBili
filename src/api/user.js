@@ -36,7 +36,8 @@ export const fetchUserInfo = async(userId, upId) =>{
             userId1: userId,
             userId2: upId
         })
-        console.log(`看下用户信息：${response}`)
+        console.error(`接受的数据：${JSON.stringify(response)}`)
+        // console.log(`看下用户信息：${JSON.stringify(response)}`)
         return ({
             "id": response.id,
             "name": response.nickname,
@@ -44,7 +45,7 @@ export const fetchUserInfo = async(userId, upId) =>{
             "followingNum": response.idolCount,
             "followersNum": response.fansCount,
             "isFollowing": response.isFollowing, // 是否已关注
-            "intro": response.intro,
+            "intro": response.intro || "",
             "playNum": response.playCount,
             "likeNum": response.likeCount
         })
@@ -100,7 +101,8 @@ export const addFollowing = async(userId, upId) => {
         })
         return response
     } catch(e) {
-        console.error("发起关注失败：", )
+        ElMessage.error(`发起关注失败：${e}`)
+        console.error(`发起关注失败：${e}`)
     }
 }
 
@@ -114,7 +116,7 @@ export const addFollowing = async(userId, upId) => {
  * 返回字段：
  *  @return {boolean} 操作是否成功
  */
-export const removeFollowing = async() => {
+export const removeFollowing = async(userId, upId) => {
     try{
         const postURL = basic_follow + 'recallFollow'
         const response = await request.post(postURL, {
@@ -123,7 +125,8 @@ export const removeFollowing = async() => {
         })
         return response
     } catch(e) {
-        console.error("发起关注失败：", )
+        ElMessage.error(`取消关注失败：${e}`)
+        console.error("取消关注失败：", e)
     }   
 }
 

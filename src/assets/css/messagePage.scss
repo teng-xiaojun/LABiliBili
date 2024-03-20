@@ -13,7 +13,7 @@
     text-align: left;
 }
 .item {
-    min-height: 8rem; 
+    min-height: 5rem; 
 }
 .item-content {
     margin-left: 0.5rem;
@@ -39,9 +39,17 @@
     width: 100%;
     background: rgb(169, 157, 244);
 }
+.send-based-btn {
+    background-color: rgb(203 184 235) !important;
+    border: none !important;
+    border-radius: 15px !important;
+    &:hover, &:active {
+        background-color: #beb7eb !important;
+    } 
+}
 @media screen and (min-width: 1020px) {
     .item {
-        min-height: 5rem;
+        min-height: 6rem;
     }
     .decoration-box {
         min-height: 10rem;

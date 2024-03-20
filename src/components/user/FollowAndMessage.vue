@@ -11,54 +11,71 @@
 </template>
 
 <script setup>
-import { ref, watch, onBeforeUnmount } from "vue"
-import { addFollowing, removeFollowing, defineProps } from "@/api/user"
+import { ref, onMounted, computed, defineProps, defineEmits } from "vue"
+import { addFollowing, removeFollowing } from "@/api/user"
 import { useRouter } from "vue-router"
 import { useUserInfo } from "@/store/userInfo"
-const isEditFollow = ref(false) // 是否更改关注状态
+import { ElMessage } from "element-plus"
+import Debounce from '@/static/debounce'
 const followText = ref("关 注") // 初始化视为未关注该up
 const userInfo = useUserInfo() // 使用登录信息
 const userId = userInfo.getId() // 登录用户的id
 const router = useRouter()
+const debounce = new Debounce() // 防抖
 // 传来的参数
 const props = defineProps({
     isFollowing: {
         type: Boolean,
+        required: true,
         default: false
     },
     upId: {
         type: Number,
+        required: true,
         default: false
     }
 })
-const isFollowing = ref(props.isFollowing) // 是否关注，默认为否
-const currentFollowing = props.isFollowing // 当前关注状态
 const upId = ref(props.upId) // 传来的up对象Id
-// 监听followText的点击状态
-watch(isFollowing, (newItem, oldItem) => { // 关注数据
-    if(newItem!=oldItem) {
-        followText.value = isFollowing.value? "已关注": "关 注"
+const emits = defineEmits(['update:isFollowingValue'])
+const isFollowing = computed({
+    // 当前关注状态
+    get:function() {
+        return props.isFollowing
+    },
+    set:function(val){
+        props.isFollowing = val
+        emits('update:isFollowingValue', val)
     }
-},{deep: true})
+}) 
 //关注和取消的代码
-const handleFollow = () => {
+const handleFollow = async() => {
+    if(userId===0||!userId) {
+        ElMessage.error(`您未登录，无法发起关注`)
+        return
+    }
+    await debounce.debounceEnd(5)
     isFollowing.value = !isFollowing.value
+    ElMessage.info(`是否成功切换${isFollowing.value}`)
+    followText.value = isFollowing.value? "已关注": "关 注"
+    if(isFollowing.value) {
+        await addFollowing(userId, upId.value)
+    } else {
+        await removeFollowing(userId, upId.value)
+    }
 }
 // 发消息
 const turnToChat = () => {
+    if(userId===0||!userId) {
+        ElMessage.error(`您未登录，无法进入发送消息`)
+        return
+    }
     const routeURL = router.resolve({
         path: `/message/MyChat/${userId}`,
     })
     window.open(routeURL.href, '_blank')
 }
-onBeforeUnmount(()=>{
-    if(currentFollowing!=isFollowing.value && isEditFollow) {
-        if(isFollowing.value) {
-            res = removeFollowing(userId, upId.value)
-        } else {
-            res = addFollowing(userId, upId.value)
-        }
-    }
+onMounted(()=>{
+    followText.value = isFollowing.value? "已关注": "关 注"
 })
 </script>
 

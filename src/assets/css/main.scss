@@ -90,7 +90,7 @@ a {
 .flex-baseline-container{
     display: flex;
     flex-flow: row nowrap;
-    align-items: start;
+    align-items: flex-start;
     justify-content: baseline;
 }
 .flex-column-container{

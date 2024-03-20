@@ -5,8 +5,11 @@
  * 3.  
  */
 import { ElMessage } from "element-plus"
+import { useUserInfo } from "../store/userInfo.js"
 import request from "./index.js"
 
+const userStore = useUserInfo()
+const userId = userStore.getId()
 const basic_video = '/'
 const basic_video_get = basic_video + 'play/'
 const basic_video_up = basic_video + '/'
@@ -92,28 +95,16 @@ export const getVideoSmall = async (location, userId, folderId) => {
             return []
         }
         return response.map((item)=>({
-            id: item.videoId,
+            videoId: item.videoId,
             title: item.videoName,
-            imgUrl: item.cover,
+            imgUrl: item.videoCover,
+            avatar: item.authorCover,
+            upId: item.authorId,
             upName: item.authorName,
             recordTime: item.createTime,
             status: item.status
         }))
     }
-}
-
-/**
- * 设置首页动态视频为已读
- */
-export const setDynamicRead = async(videoId) =>{
-    try {
-        const postURL = ''
-        const response = await request.post(postURL, {
-
-        })
-    } catch (e) {
-        console.error("设置动态视频已读：", e)
-    }        
 }
 
 /**
@@ -133,10 +124,11 @@ export const getVideoDetail = async(videoId, userId, collectGroupId) =>{
         }
         return {
             id: response.id, // number
+            url: response.url,
             title: response.name, // string
             intro: response.intro, // string
             createtime: response.createTime || '2024-01-22', // string
-            tags:"'大学生', '计算机', '工作', '张雪峰','这就是真实生活力量', '生活','日常','程序员','生活记录','记录','生活万花筒 9.0 拥抱真实生活'",
+            // tags:"'大学生', '计算机', '工作', '张雪峰','这就是真实生活力量', '生活','日常','程序员','生活记录','记录','生活万花筒 9.0 拥抱真实生活'",
             danmukuCount: response.danmakuCount, // number
             likeCount: response.likeCount, // number
             collectCount: response.collectCount,
@@ -158,7 +150,6 @@ export const getRecommendVideos = async(videoId) => {
     try {
         const getUrl = basic_video_get + 'getCommendVideo/' + videoId
         const response = await request.get(getUrl, {videoId: videoId})
-        console.log("看下完整的推荐视频参数", response[0])
         return response.map((item)=>({
             id: item.video_id, // int
             videoName: item.video_name, // string
@@ -230,6 +221,7 @@ export const fetchUpVideo = async (userId) => {
             imgUrl: video.cover,
             length: video.length,
             videoName: video.name,
+            authorId: userId,
             playCount: video.playCount,
             createTime: video.createTime
         }))

@@ -18,12 +18,12 @@
 
 <script setup>
 import { ref, watch, onMounted, defineAsyncComponent } from "vue"
-import { useUserInfo } from "@/store/userInfo"
+import { fetchUserInfo } from '@/api/user'
 import { useChat } from "@/store/chat"
-const chatSession = useChat() // 使用聊天信息
+import { useUserInfo } from "@/store/userInfo"
 const userInfo = useUserInfo() // 使用登录信息
 const userId = userInfo.getId() // 登录用户的id
-const reply = ref() // 回复内容
+const chatSession = useChat() // 使用聊天信息
 const chatListVue = defineAsyncComponent(()=>
     import ("./ChatObj.vue")
 )
@@ -41,55 +41,25 @@ const currentPerson = ref({
     updatedUnreadFlag: true, // 是否有新的未读消息
     unreadNum: 1, // 未读新消息的条数 
 })
-const chatData = ref([{
-    chatId: 0,
-    receiverId: 1, // chatToId
-    senderId: 2,
-    content: "如果说昨天是梦",
-    createTime: "2024-2-2 10:46",
-    status: "",
-},{
-    chatId: 0,
-    receiverId: 2, 
-    senderId: 1,
-    content: "那么明天则是幻想",
-    createTime: "2024-2-2 10:46",
-    status: "",
-},{
-    chatId: 0,
-    receiverId: 1, 
-    senderId: 2,
-    content: "谢谢你的关注~",
-    createTime: "2024-2-2 10:46",
-    status: "",
-}])
-const bigModelData = ref([]) // 大模型数据
-// 打开emoji界面
-const openEmoji = () => {
-
-}
-// 首先获取聊天对象
-const getUserList = () => {
-
-}
-// 获取新数据
-const getChatData = () => {
-
-}
-// 发送已输入文字
-const submitReply = () => {
-    console.log('回复内容', reply.value)
-    socket.send(JSON.stringify())
+const getIntro = async() => {
+    const res = await fetchUserInfo(userId, currentPerson.value.upId)
+    if(currentPerson.value.upId!==0) {
+        currentPerson.value.intro = res.intro
+    } else {
+        currentPerson.value.intro = "星火大模型伴你同行"
+    }
 }
 // 监听
-watch(chatSession.currentUpId, (newValue, oldValue) => {
-    currentPerson.value.upId = newValue
+watch(chatSession, (newValue, oldValue) => { // NOTE 监听pinia中属性会失败
+    currentPerson.value.upId = newValue.getCurrentUp()[0]
     currentPerson.value.upName = chatSession.getCurrentUp()[1]
-    console.log(`切换后${currentPerson.value.upName}`)
+    getIntro()
 }, {deep: true})
 // 接收消息时的处理
 onMounted(()=>{
-   
+    currentPerson.value.upId = chatSession.getUpId()
+    currentPerson.value.upName = chatSession.getUpName()
+    getIntro() // 获得intro
 })
 </script>
 

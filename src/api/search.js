@@ -5,11 +5,9 @@
  *  2. 
  *  */ 
 
+import { ElMessage } from "element-plus"
 import request from "./index.js"
 
-/**
- * PART A. 视频
- */
 const basic_search = '/search/'
 /**
  * 请求视频搜索框的历史
@@ -23,7 +21,8 @@ export const fetchVideoHistory = async() => {
         const history = await request.get('/search/history',)
         return history
     }catch(e){
-        console.log('搜索框历史和热点接口报错', e)
+        ElMessage.error('搜索框历史接口报错', e)
+        console.error('搜索框历史接口报错', e)
     }
 }
 
@@ -39,7 +38,8 @@ export const fetchVideoHot = async() => {
         const hot = await request.get('/search/hot',)
         return hot
     }catch(e){
-        console.log('搜索框历史和热点接口报错', e)
+        ElMessage.error('搜索框热点接口报错', e)
+        console.error('搜索框热点接口报错', e)
     }
 }
 
@@ -58,27 +58,65 @@ export const fetchVideoResNum = async(keyword) => {
         })
         return response
     }catch(e){
-        console.log('请求搜索结果的页数和文件数失败：', e)
+        ElMessage.error(`请求搜索结果的页数和文件数失败：${e}`)
+        console.error('请求搜索结果的页数和文件数失败：', e)
+        return Promise.reject(e)
+    }
+}
+
+
+/**
+ * 获取视频搜索结果的视频结果
+ */
+export const fetchVideoResFirst = async(keyword, pageNumber, type) => {
+    try {
+         const getURL = basic_search + `videoKeywordSearch/${keyword}/${pageNumber}/${type}`
+         const response = await request.get(getURL, {
+            keyword: keyword
+         })
+         return response.map((video)=>({
+            id: video.video_id,
+            imgUrl: video.cover,
+            intro: video.intro,
+            authorName: video.author_name,
+            url: video.url,
+            danmukuCount: video.danmakuCount,
+            length: video.length,
+            videoName: video.video_name,
+            playCount: video.play_count,
+            createTime: video.create_time
+         }))
+    } catch(e) {
+        ElMessage.error(`搜索结果视频项报错：${e}`)
+        console.log(`搜索结果视频项报错：${e}`)
+        return Promise.reject(e)
     }
 }
 
 /**
- * 获取视频搜索结果
- * 场景：@/Pages/search/searchPage
- *  请求字段：
- * @param none
- * @return {[]} 搜索数据的结果
+ * 获取视频搜索结果的用户结果
  */
-export const fetchVideoSearchRes = async(keyword) => {
-    try{
-        console.log("我的keyword呢", keyword)
-        const getURL = basic_search + `videoKeywordSearch/${keyword}/1/1`
-        const response = request.get(getURL, {
-            
+export const fetchVideoResSecond = async(keyword, pageNumber, type, userId) => {
+    try {
+        const getURL = basic_search + `userKeywordSearch/${keyword}/${pageNumber}/${type}/${userId}`
+        const response = await request.get(getURL, {
+            keyword: keyword,
+            pageNumber: pageNumber,
+            type: type,
+            userId: userId
         })
-        return response
-    }catch(e){
-        console.log('搜索结果报错：', e)
+        return response.map((user)=>({
+            id: user.id,
+            name: user.nickname,
+            avatar: user.cover,
+            followersNum: user.fans_count, 
+            intro: user.intro,
+            isFollowing: user.is_follow,
+        }))
+    } catch(e) {
+        ElMessage.error(`搜索结果用户项报错：${e}`)
+        console.error(`搜索结果用户项报错：${e}`)
+        return Promise.reject(e)
     }
 }
 

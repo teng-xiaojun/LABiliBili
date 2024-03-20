@@ -31,7 +31,7 @@
             <button @click="nextSlide()" class="video-category-controller controller-right common-based-btn font-fifth-color">下一项</button>
         </div>
         <!--推荐视频-->
-        <div v-if="recommendVideos.length>0" class="video-recommend-content">
+        <div v-if="recommendVideos&&recommendVideos.length>0" class="video-recommend-content">
             <div class="video-recommend-item" v-for="(item,index) in recommendVideos" :key="index">
                 <recommendVue :videoInfo="item" :isUpDownFlag="false" class="recommend-item-detail" /> 
             </div>
@@ -115,7 +115,6 @@ onMounted(async()=>{
     otherCompilationsVideos.value = await fetchVideosFromCompilations(userId, videoId)
     // 调用推荐接口
     recommendVideos.value = await getRecommendVideos(videoId)
-    console.log(`看下推荐视频：${JSON.stringify(recommendVideos.value)}`)
 })
 </script>
 

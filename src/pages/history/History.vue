@@ -7,22 +7,26 @@
             <img src="@/assets/img/utils/rubbish.svg" style="width: 0.9rem; height: 0.9rem; margin-right: 0.2rem;" />
             <p class="delete-history" @click="deleteHistory(1,0,0)" >清空历史</p>
         </div>
-        <div class="flex-center-container" style="margin-top: 2rem;">
-        <!--日历-->
-            <calendarVue v-if="historyData.length!==0" class="calendar-panel" />
+        <div class="flex-center-container" style="margin-top: 2rem;align-items: start;">
+            <!--日历-->
+            <calendarVue v-if="historyData.length!==0" class="calendar-panel" style="margin-right: 5rem;" />
             <!--记录纵轴-->
             <div v-if="historyData.length!==0" class="flex-center-container history-important">
                 <div class="time-based-line"><!--时间轴-->
                 </div>
                 <div class="flex-column-left-max-container history-items">
-                    <img src="" />
-                    <div v-for="(item, index) in historyData" :key="index" @mousemove="deleteSingle(index, item.id)"
-                    class="flex-based-container based-box history-item" @click="turnToDetail(item.id)"><!--上面的点缀-->
-                        <img :src="item.imgUrl" style="width: 10rem; height: 10rem;" />
-                        <div class="flex-column-left-max-container">
-                            <p style="font-size: 2rem; font-weight: 600; margin-left: 1rem;">{{ item.title }}</p>
-                            <p style="font-size: 0.9rem; margin:2rem 1rem; ">{{ item.upName }}</p>
-                            <p style="position: absolute; bottom: 1rem; left: 11rem;">{{ item.recordTime }}</p>
+                    <div v-for="(item, index) in historyData" :key="index" class="flex-left-container animate-elem"
+                     style="margin-left: -2rem; width: 20rem; cursor: pointer; position:relative;" @click="turnToDetail(item.videoId, item.upId)">
+                        <div class="horizental-bg"></div><!--横轴背景-->
+                        <img src="@/assets/img/utils/history_icon.svg" style="margin:3rem;height: 3rem;" class="decorate-elem" />
+                        <div @mousemove="deleteSingle(index, item.videoId)" 
+                        class="flex-based-container based-box history-item"><!--上面的点缀-->
+                            <img :src="item.imgUrl" style="width: 16rem; height: 10rem;" />
+                            <div class="flex-column-left-max-container" draggable="true">
+                                <p style="font-size: 2rem; font-weight: 600; margin-left: 1rem;">{{ item.title }}</p>
+                                <p style="font-size: 0.9rem; margin:2rem 1rem; ">{{ item.upName }}</p>
+                                <p style="margin-left: 1rem;">{{ item.recordTime }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -47,9 +51,15 @@ const calendarVue = defineAsyncComponent(()=>
     import ("@/components/Calendar.vue")
 )
 // 跳转
-const turnToDetail = (videoId) => {
+const turnToDetail = (videoId, upId) => {
     const routeURL = router.resolve({
-        path: `/video/${videoId}`
+        name: "videoDetail",
+        params: {
+            videoId: videoId,
+        },
+        query: {
+            upId: upId
+        }
     })
     window.open(routeURL.href, '_blank')
 }
@@ -57,6 +67,7 @@ const turnToDetail = (videoId) => {
 const deleteSingle = (hereIndex, videoId) => {
     if(false) { // 等实现拖拽
         deleteHistory(0, videoId, hereIndex)
+        
     }
 }
 // 删除播放历史
@@ -81,7 +92,7 @@ onMounted(async()=>{
 
 <style lang="scss" scoped>
 .calendar-panel {
-    // display: none !important;
+    display: none !important;
 }
 .history-wrap {
     min-width: 42rem;
@@ -107,6 +118,14 @@ onMounted(async()=>{
 }
 .history-items {
     margin-top: 2rem;
+    .horizental-bg {
+        width: 9rem;
+        height: 1.5rem; 
+        background-color: #deeaf7;
+        position: absolute;
+        left: 1rem;
+        z-index: -5;
+    }
     .history-item {
         min-height: 4rem;
         height: auto;
@@ -117,18 +136,18 @@ onMounted(async()=>{
         position: relative;
     }
 }
+.animate-elem {
+    &:hover{
+        .decorate-elem {
+            animation: rotate 5s linear infinite;
+        }
+    }
+}
 $apart-distance: 35rem;
+$left-distance: 15rem;
 @media screen and (min-width:1200px) {
     .calendar-panel {
         display: flex !important;
-        position: absolute;
-        top: 11rem;
-        left: 20rem;
     }    
-    .history-important {
-        position: absolute;
-        top: 10rem;
-        left: $apart-distance + 20rem;
-    }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="user-panel flex-column-container">
-    <SidebarPanel class="sidebar" :id="upId" :menuConfig="menuConfig" />
-    <UserInfo class="user-wrap" :isBgShow="true" />
+    <SidebarPanel class="sidebar" :id="upId" :menuConfig="menuConfig" :isCollapseVal="true" />
+    <UserInfo class="user-wrap" :isBgShow="true" :upId="upId" />
     <user-content :style="{'border': isHistoryAndTrend? 'none': ''}">
       <router-view v-slot="{ Component }">
         <transition name="move" mode="out-in">
@@ -50,13 +50,7 @@ const menuConfig = reactive([{
         title: "最近点赞", 
         permiss: true 
       }],
-  },
-  {
-    icon: "DataAnalysis",
-    index: `/userCenter/charts/${upId}`,
-    title: "数据中心",
-    permiss: true 
-  },
+    },
   {
     icon: "MapLocation",
     index: `/userCenter/trends/${upId}`,
@@ -76,6 +70,13 @@ const menuConfig = reactive([{
     permiss: true 
   },
 ])
+  // },
+  // {
+  //   icon: "DataAnalysis",
+  //   index: `/userCenter/charts/${upId}`,
+  //   title: "数据中心",
+  //   permiss: true 
+  // },
 onMounted(async()=>{
   // 获取权限
   if(userId!==upId) {
@@ -110,6 +111,8 @@ $user-box-first-color: rgb(161, 150, 235);
 }
 .user-panel{
   position: relative;
+  width: 100%;
+  height: 100%;
 }
 .sidebar{
   position: fixed;

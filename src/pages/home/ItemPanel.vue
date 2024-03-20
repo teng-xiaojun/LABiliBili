@@ -11,38 +11,32 @@
         <div class="horizontal-divided-line" style="margin-bottom: 0.5rem;"></div>
         <!--动态内容-->
         <div class="trend-content">
-          <el-scrollbar style="height: 20rem;">
+          <el-scrollbar style="height: 22rem;">
               <!--未读数据-->
               <!--没有未读数据-->
-              <div v-if="unread.length===0" style="height: 3rem; display: flex; align-items:center;
-              justify-content: center;color: #11457da9; ">没有未读
-                <p v-if="panelType==='trend'">动态</p><p v-else>历史记录</p>
+              <div v-if="unread.length===0&&panelType==='trend'" style="height: 3rem; display: flex; align-items:center;
+              justify-content: center;color: #11457da9; ">没有未读动态
               </div>
               <!--有未读数据-->
-              <div v-else>
-                <div class="trend-history-title flex-center-container">未读
-                  <p v-if="panelType==='trend'">动态</p><p v-else>历史记录</p>
-                </div>
-                <div v-for="(item, index) in unread" :key="index" @click="turnToVideoDetail(item.videoId)"
+              <div v-else-if="panelType==='trend'">
+                <div class="trend-history-title flex-center-container">未读动态</div>
+              </div>
+              <div v-for="(item, index) in unread" :key="index" 
                 class="trend-history-item flex-center-container">
-                  <smallVideoVue :videoRecord="item"></smallVideoVue>
-                </div>
+                  <smallVideoVue :videoRecord="item" @click="turnToVideoDetail(item.videoId, item.upId)"></smallVideoVue>
               </div>
             <!--中间线-->
-            <div class="horizontal-divided-line small-video-line"></div>
+            <div v-if="panelType==='trend'" class="horizontal-divided-line small-video-line"></div>
               <!--已读数据-->
               <!--没有已读数据-->
-              <div v-if="read.length===0" style="height: 3rem; display: flex; align-items:center;
-              justify-content: center;color: #11457da9; ">没有已读
-                <p v-if="panelType==='trend'">动态</p><p v-else>历史记录</p>
+              <div v-if="read.length===0 &&panelType==='trend'" style="height: 3rem; display: flex; align-items:center;
+              justify-content: center;color: #11457da9; ">没有已读动态
               </div>
               <!--有已读数据-->
-              <div v-else>
-                <div class="trend-history-title flex-center-container" style="margin-bottom: 0.5rem;">已读
-                  <p v-if="panelType==='trend'">动态</p><p v-else>历史记录</p>
-                </div>
+              <div v-else-if="panelType==='trend'">
+                <div class="trend-history-title flex-center-container" style="margin-bottom: 0.1rem;">已读动态</div>
                 <div v-for="(item, index) in read" :key="index" class="trend-history-item flex-center-container">
-                  <smallVideoVue :videoRecord="item" @click="turnToVideoDetail(item.videoId)"></smallVideoVue>
+                  <smallVideoVue :videoRecord="item" @click="turnToVideoDetail(item.videoId, item.upId)"></smallVideoVue>
                 </div>
               </div>
           </el-scrollbar>
@@ -52,21 +46,31 @@
     <div v-else class="collect-panel">
         <!--收藏左-->
         <div class="collect-folder-left">
+          <div v-if="collectFolderData.length>0">
             <div v-for="(folder, index) in collectFolderData" :key="index">
-            <div @click.stop="currentCollectFolder=folder.id" 
-            :class="{'main-first-color collect-folder-chosen':folder.id===currentCollectFolder}">
+              <div @click.stop="currentCollectFolder=folder.id" 
+              :class="{'main-first-color collect-folder-chosen':folder.id===currentCollectFolder}">
                 <p style="margin-top:0.3rem;">{{folder.name}}</p>
+              </div>
             </div>
-            </div>
+          </div>
+          <div v-else>
+            <img src="@/assets/img/utils/noData.png" style="width: 12rem; height: 12rem;" />
+          </div>
         </div>
         <div class="vertical-divided-line"></div>
         <!--收藏右-->
         <div class="collect-content-right">
-            <div v-for="(content, index) in collectVideoData" :key="index">
-            <div></div>
-            <div>
-                <p class="collect-content-title">{{content.title}}</p>
+            <div v-if="collectVideoData.length>0">
+              <div v-for="(content, index) in collectVideoData" :key="index">
+                <div></div><!--TODO 没写完这里-->
+                <div>
+                    <p class="collect-content-title">{{content.title}}</p>
+                </div>
+              </div>
             </div>
+            <div v-else class="flex-center-container" style="height: 95%;">
+              等待新的收藏数据~
             </div>
         </div>
     </div>
@@ -103,9 +107,15 @@ const smallVideoVue = defineAsyncComponent(()=>
 )
 
 // 跳转到视频详情页
-const turnToVideoDetail = (videoId) => {
+const turnToVideoDetail = (videoId, upId) => {
   const routeURL = router.resolve({
-    path: `/video/${videoId}`
+    name: 'videoDetail',
+    params: {
+        videoId: videoId,
+    },
+    query: {
+      upId: upId
+    }
   })
   window.open(routeURL.href, '_blank')
 }
@@ -136,9 +146,11 @@ const getData = async() => {
   if(panelType.value==='collect'){
     // 首先获取收藏夹
     collectFolderData.value = await fetchCollection(userId)
-    currentCollectFolder.value = collectFolderData.value[0].id
-    // 然后获取收藏夹中视频
-    collectVideoData.value = await getVideoSmall(panelType.value, userId, currentCollectFolder.value)
+    if(collectFolderData.value.length>0) {
+      currentCollectFolder.value = collectFolderData.value[0].id
+      //然后获取收藏夹中视频
+      collectVideoData.value = await getVideoSmall(panelType.value, userId, currentCollectFolder.value)
+    }
   } else {
     videoSmallData.value = await getVideoSmall(panelType.value, userId, 0)
     videoSmallData.value.forEach((video)=>{
@@ -164,7 +176,6 @@ onMounted(async()=>{
   // 将动态已读
   if(panelType.value==='trend'){
     await editTrendToRead(userId)
-
   }
 })
 onBeforeUnmount(()=>{
@@ -183,9 +194,9 @@ $trend-and-history-width: 23rem;
     padding-bottom: 0.3rem;
   }
   .trend-history-item {
-    width: $trend-and-history-width - 1rem;
-    position: relative;
-    height: 4rem;
+    width: $trend-and-history-width;
+    height: 3.2rem;
+    margin-bottom: 0.8rem;
   }
 }
 .change-banner{

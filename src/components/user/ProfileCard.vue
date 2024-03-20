@@ -1,19 +1,22 @@
 <template>
-    <img :src="firstAvatar" alt="头像" @mouseover="isUpIntro=true" class="second-common-avatar" @click="turnToOtherCenter(userId)"/>
-    <div v-if="isUpIntro" @mouseleave="isUpIntro=false" class="profile-pop-up">
-        <div class="profile-pop-up-name font-first-color">{{infoData.name}}</div>
-        <div class="follow-data">
-            <span style="vertical-align: -0.1rem;" @click="follow()">关注数{{infoData.followingNum}}</span>
-            <span>粉丝数{{infoData.fansNum}}</span>
+    <div style="position: relative;overflow: visible;">
+        <img :src="firstAvatar" alt="头像" @mouseover="isUpIntro=true" @mouseout="isUpIntro=false"
+        class="first-common-avatar" @click="turnToOtherCenter(userId)"/>
+        <div v-if="isUpIntro" @mouseout="isUpIntro=false" class="profile-pop-up">
+            <div class="profile-pop-up-name font-first-color">{{infoData.name}}</div>
+            <div class="follow-data">
+                <span style="vertical-align: -0.1rem;" @click="follow()">关注数{{infoData.followingNum}}</span>
+                <span>粉丝数{{infoData.fansNum}}</span>
+            </div>
+            <div class="profile-pop-up-intro">
+                <p>{{infoData.intro}}</p>
+            </div>
+            <div class="concern-group">
+                <button v-if="!infoData.isFocus" class="concern common-btn-1 main-first-color">关注</button>
+                <button v-else-if="infoData.isSame">无法关注</button>
+                <button class="sendMessage common-btn-1">消息</button>
+            </div>
         </div>
-        <div class="profile-pop-up-intro">
-            <p>{{infoData.intro}}</p>
-        </div>
-        <div class="concern-group">
-            <button v-if="!infoData.isFocus" class="concern common-btn-1 main-first-color">关注</button>
-            <button v-else-if="infoData.isSame">无法关注</button>
-            <button class="sendMessage common-btn-1">消息</button>
-         </div>
     </div>
 </template>
 

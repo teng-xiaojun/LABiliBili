@@ -23,11 +23,6 @@ export const fetchNoticeNum = async(userId) => {
             commentCount: response.commentCount,
             dynamicVideoCount: response.dynamicVideoCount,
             likeCount: response.likeCount,
-            // totalCount: 20,
-            // chatCount: 11,
-            // commentCount: 3,
-            // dynamicVideoCount: 6,
-            // likeCount: 6,
         }
     }catch(e){
         console.error("评论数、点赞数和动态数获取失败：", e)
@@ -36,9 +31,26 @@ export const fetchNoticeNum = async(userId) => {
 }
 
 /**
+ * 获得回复消息
+ */
+export const fetchReplyNotice = async(userId) => {
+    try {
+        const getURL = basic_notice_get + `getCommentNotice/${userId}`
+        const response = await request.get(getURL, {
+            userId: userId
+        })
+        console.log(`获取的回复：${response}`)
+        return response
+    } catch(e){
+        ElMessage.error(`获得回复消息失败：${e}`)
+        console.error(`获得回复消息失败：${e}`)
+    }
+}
+
+/**
  * 获得点赞消息
  */
-export const fetchLikeNotice = async() => {
+export const fetchLikeNotice = async(userId) => {
     try {
         const getURL = basic_notice_get + `getLikeNotice/${userId}`
         const response= await request.get(getURL, {
@@ -46,25 +58,8 @@ export const fetchLikeNotice = async() => {
         })
         return response
     }catch(e){
+        ElMessage.error(`获得点赞消息失败：${e}`)
         console.error(`获得点赞消息失败：${e}`)
-    }
-}
-
-/**
- * 获得评论消息
- */
-export const fetchCommentNotice = async(userId) => {
-    try {
-        const getURL = basic_notice_get + `getCommentNotice/${userId}`
-        const response = await request.get(getURL, {
-            userId: userId
-        })
-        return {
-
-        }
-    } catch(e) {
-        ElMessage.error("获得评论消息失败")
-        console.error(`获得评论消息失败：${e}`)
     }
 }
 

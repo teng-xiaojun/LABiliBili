@@ -24,20 +24,22 @@
 					<p style="width">{{loginItem.name}}</p>
 				</div>
 				<div class="flex-center-container chose-tip">
-					<img src="@/assets/img/login/circle_decoration.svg" style="margin-right:0.4rem;animation: rotate 4s linear infinite;" />
+					<img src="@/assets/img/login/circle_decoration.svg" style="margin-right:0.4rem;animation:rotate 4s linear infinite;" />
 					<p>点击非按钮位置返回</p>
 				</div>
 			</div>
 			<div v-else>
 				<!--登录页面-->
-				<div class="title">FakeLi</div>
+				<div class="title">LABiliBili</div>
 				<!--方式1-手机号登录-->
 				<div v-if="currentTypeIndex===0">
 					<phoneLogin />
 				</div>
 				<!---->
-				<!--方式2-微信登录-->
-				<div v-else-if="currentTypeIndex===1">微信登录</div>
+				<!--方式2-邮箱登录-->
+				<div v-else-if="currentTypeIndex===1">
+					<mailLogin />
+				</div>
 				<!--方式3-账户登录-->
 				<template v-else>
 					<accountLogin />
@@ -45,31 +47,39 @@
 			</div>
 		</div>
 	</div>
+	<!--注册弹窗-->
+    <enrollCard style="width:40rem; height:35rem;" /><!--v-model:enrollConfirm=XXX-->
 </template>
 
 <script setup>
-import { onMounted, toRefs, defineAsyncComponent } from 'vue'
-import { ref, reactive } from 'vue'
+import { ref, reactive, toRefs, defineAsyncComponent, provide } from 'vue'
 import { loadSlim } from "tsparticles-slim"
 import { particlesConfig } from './particlesConfig'
+const isEnroll = ref(false) // 选择注册
 const isChangeExpanse = ref(false)
 const currentTypeIndex = ref(2) // 三种登陆方式: 用0,1,2
 const accountLogin = defineAsyncComponent(()=>
-	import ('./ModuleAccount.vue')
+	import ('./ModuleAccount')
 )
 const phoneLogin = defineAsyncComponent(()=>
 	import ('./ModulePhone')
 )
-// const enrollCard = defineAsyncComponent(()=>
-// 	import ('./EnRoll')
-// )	
+const mailLogin = defineAsyncComponent(()=>
+	import ('./ModuleMail')
+)
+const enrollCard = defineAsyncComponent(()=>
+	import ('./EnRoll')
+)	
+// 监听是否为账密登录
+
+
 // 切换登录方式
 const loginMethod = [{
 	name: "手机号登录",
 	icon: require("@/assets/img/login/phone.svg")
 },{
-	name: "微信登录",
-	icon: require("@/assets/img/login/wechat.svg")
+	name: "邮箱登录",
+	icon: require("@/assets/img/login/mail.svg")
 },{
 	name: "账户登录",
 	icon: require("@/assets/img/login/account.svg")

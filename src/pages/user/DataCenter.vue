@@ -38,32 +38,6 @@
                     <div id="chart-container"></div>
                 </div>
             </div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
-            <div>测试</div>
         </el-scrollbar>
         </Content>
     </div>
@@ -71,7 +45,7 @@
 
 <script setup>
 import {ref, onMounted } from "vue"
-import echarts from 'echarts'
+// import echarts from 'echarts'
 const dataType = ref(0) // 0：视频数据，1：图文数据
 const data = [{
     name: "视频数据",

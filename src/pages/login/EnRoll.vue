@@ -28,6 +28,9 @@
                 </div>
             </div>
         </template>
+        <template #footer>
+            <el-button type="primary" class="basic-btn common-based-btn">提交</el-button>
+        </template>
     </el-dialog>
 </template>
 
@@ -36,7 +39,7 @@ import { defineProps, defineEmits, ref, computed, onBeforeUnmount } from 'vue'
 const props = defineProps({
     enrollConfirm: {
       type: Boolean,
-      required: true,
+      required: false,
       default: false
     }
 })

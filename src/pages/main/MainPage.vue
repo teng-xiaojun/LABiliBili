@@ -16,7 +16,7 @@
       </video-small-wrap>
     </template>
     <footer style="margin-bottom: 5rem; color:#11457da9;">
-      <div v-if="downNew" style="height: 4rem;"><aLoadingVue /></div>
+      <div v-if="downNew&&isRemain" style="height: 4rem;"><aLoadingVue /></div>
       <div v-else> 您已看完所有视频~ </div>
     </footer>
   </div>
@@ -32,13 +32,17 @@ import { getVideoBig } from "@/api/video"
 import { fetchUserInfo } from "@/api/user"
 import { useUserInfo } from '@/store/userInfo'
 import Debounce from '@/static/debounce'
+import { ElMessage } from 'element-plus'
+let startLoc = 1 // 当前位置0
+let probableData = [] // 可能放入的新数据
+let scrollToTopButton = document.getElementById('back-top-btn-id')
+const isRemain = ref(true) // 是否仍然有新数据
 const debounce = new Debounce() // 防抖
 const userInfo = useUserInfo() // 保存登录信息
 const userId = userInfo.getId()
-const startLoc = ref(1) // 当前位置0
 const eachTimeVideos = 10 // 每次获取的视频数
 const downNew = ref(false) // 触底加载 
-const isUpdating = ref(false) // 是否在处理触底加载
+// const isUpdating = ref(false) // 是否在处理触底加载
 const router = useRouter()
 const aLoadingVue = defineAsyncComponent(()=>
   import ("@/components/public/aLoading")
@@ -49,32 +53,43 @@ const scrollToTop = () => {
     behavior: 'smooth' // 使用smooth滚动效果，如果浏览器不支持，会自动回退到不带smooth的滚动
   })
 }
+const scrollToTopByBtn = (elemDom) =>{
+  if(elemDom){ // NOTE 这里要用两层嵌套，1层的&&不够
+    if(isTop()){ // 为兼容浏览器，使用pageYOffset而非scrollY
+      elemDom.style.display = 'flex'
+    } else {
+      elemDom.style.display = 'none'
+    }
+  }
+}
 /**
  * 获取视频数据
  */
 const getData = async() => {
-  const tmp = await getVideoBig(startLoc.value) 
+  const tmp = await getVideoBig(startLoc) 
   videoView.value = tmp || VideoDetailList_test
 }
 const updateData = async() => {
-  if(isUpdating) {
+  startLoc += eachTimeVideos
+  probableData = await getVideoBig(startLoc) 
+  downNew.value = false
+  if(probableData.length===0){
+    isRemain.value = false // 没有剩余数据了
+    ElMessage.success("休息下吧！没有更多数据了QAQ")
+    window.removeEventListener('scroll', loadWhenBottom)
     return
   }
-  isUpdating = true
-  startLoc += eachTimeVideos
-  const tmp = await getVideoBig(startLoc.value) 
-  const probableData = tmp||VideoDetailList_test
-  if (!videoView.value.includes(probableData)) {
-    videoView.value.push(probableData)
-  }
-  downNew.value = false
-  isUpdating.value = false
+
+  // 过滤掉已存在videoView中的视频
+  let uniqueVideos = probableData.filter(video => 
+    !videoView.value.some(existingVideo => existingVideo.id === video.id)
+  )
+  videoView.value = [...videoView.value, ...uniqueVideos] // NOTE 使用push会有浅复制问题
 }
-watch(downNew, async(newIndex, oldIndex) => {
-  if(newIndex) {
-    await debounce.debounceEnd(5)
-    window.addEventListener("updateWhenBottom", debounce) 
-  }
+watch(downNew, async() => {
+  await debounce.debounceEnd(7)
+  updateData()
+  window.addEventListener("updateWhenBottom", debounce) 
 })
 // 页面是否下滑
 const isTop = () => {
@@ -86,7 +101,7 @@ const isTop = () => {
  * 触底加载
  */
 const loadWhenBottom = () => {
-  if(document.documentElement.clientHeight+window.scrollY>=document.documentElement.scrollHeight){
+  if(document.documentElement.clientHeight+window.scrollY >= document.documentElement.scrollHeight-10){
     downNew.value = true
   } else {
     downNew.value = false
@@ -122,28 +137,17 @@ onMounted(() => {
   if (userId>0) {
     getUserDetail(userId)
   } 
+  scrollToTopButton = document.getElementById('back-top-btn-id')
   // 视频
   getData()
-  const videoBoxElem = document.getElementById('video-box-id')
-  // getVirtualList.observe(videoBoxElem)
   // 返回顶部
-  let scrollToTopButton = undefined
-  scrollToTopButton = document.getElementById('back-top-btn-id')
-  const scrollToTopByBtn = () =>{
-    if(scrollToTopButton){ // NOTE 这里要用两层嵌套，1层的&&不够
-      if(isTop()){ // 为兼容浏览器，使用pageYOffset而非scrollY
-      scrollToTopButton.style.display = 'flex'
-      } else {
-        scrollToTopButton.style.display = 'none'
-      }
-    }
-  }
-  window.addEventListener('scroll', scrollToTopByBtn)
+  window.addEventListener('scroll', () => scrollToTopByBtn(scrollToTopButton))
   window.addEventListener('scroll', loadWhenBottom)
 })
 
 onBeforeUnmount(()=>{
-  window.removeEventListener('scroll', scrollToTopByBtn)
+  window.removeEventListener('scroll', () => scrollToTopByBtn(scrollToTopButton))
+  window.removeEventListener('scroll', loadWhenBottom)
 })
 
 </script>

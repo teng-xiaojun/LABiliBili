@@ -176,14 +176,3 @@ export const editCollections = async() => {
         console.error("获取收藏夹失败", e)
     }
 }
-
-/**
- * 查看收藏夹中的视频
- */
-export const fetchVideosFromCollect = async (userId) => {
-    try{
-        const getURL = `/video/getCollectVideo/${userId}`
-    }catch(e){
-        console.error("查看收藏夹中的视频失败：", e)
-    }
-}

@@ -8,6 +8,19 @@ import { ElMessage } from "element-plus"
 import { useRefreshToken } from '@/store/token' // 长短token的使用
 import request from "./index.js"
 import axios from "axios"
+
+const login_basic_url = '/login/'
+const login_api_url = '/api/login/'
+const getAndRefreshToken = (response) => {
+    const authToken = response.headers['shortauthorization']
+    const refreshTokenStore = useRefreshToken()
+    if(authToken) {
+        request.defaults.headers.common['shortauthorization'] = authToken
+        refreshTokenStore.isTokenPolling = true
+        refreshTokenStore.saveData(authToken)
+    }
+}
+
 /**
  * 请求账密的验证码
  * 场景：@/Pages/login/LoginPage
@@ -38,20 +51,15 @@ export const getCaptcha = async () => {
  */
 export const verifyLogin = async (userName, password, captcha) => {
     try {
-        const response = await axios.post('/api/login/passwordLogin', {
+        const response = await axios.post(login_api_url+'passwordLogin', {
             userName: userName,
             password: password,
             captcha: captcha
         })
-        const authToken = response.headers['shortauthorization']
-        const refreshTokenStore = useRefreshToken()
-        if(authToken) {
-            request.defaults.headers.common['shortauthorization'] = authToken
-            refreshTokenStore.isTokenPolling = true
-            refreshTokenStore.saveData(authToken)
-        }
+        getAndRefreshToken(response)
         return response.data.data
     } catch (e) {
+        ElMessage.error('服务端返回的错误',e)
         console.error('服务端返回的错误',e);;
     }
 }
@@ -81,12 +89,14 @@ export const enroll = async(username, nickName, password, phoneNum, captcha, ava
  */
 export const getPhoneCaptcha = async(phoneNumber) => {
     try {
-        const getURL = '/login/phoneNumberCpatcha'
+        const getURL = login_basic_url + 'phoneNumberCaptcha/' + phoneNumber
         const response = await request.get(getURL, {
-
+            phoneNumber: phoneNumber
         })
-        if(!response) {
-            ElMessage.error("后端发生错误")
+        if(response) {
+            ElMessage.success("手机短信已发送，请查收")
+        } else {
+            ElMessage.error("手机短信发送失败")
         }
         return response
     } catch(e) {
@@ -100,15 +110,57 @@ export const getPhoneCaptcha = async(phoneNumber) => {
  */
 export const sendPhoneLogin = async(phoneNumber, captcha) => {
     try {
-        const postURL = '/login/phoneNumberLogin'
-        const response = await request.post(postURL, {
+        const postURL = login_api_url + `phoneNumberLogin`
+        const response = await axios.post(postURL, {
             phoneNumber: phoneNumber,
             captcha: captcha
         })
-        return response
+        console.log(`查看手机号结果：${JSON.stringify(response)}`)
+        getAndRefreshToken(response)
+        return response.data.data
     } catch (e) {
         console.error('手机号登录失败：', e)
         ElMessage.error("手机号登录失败")
+    }
+}
+
+/**
+ * 邮箱验证码
+ */
+export const emailCaptcha = async(mailNumber) => {
+    try {
+        const getURL = login_basic_url + `mailNumberCaptcha/` + mailNumber
+        const response = await request.get(getURL, {
+            mailNumber: mailNumber
+        })
+        if(response) {
+            ElMessage.success("邮箱验证码发送成功")
+        } else {
+            ElMessage.error("邮箱验证码为空")
+        }
+        return response
+    } catch (e) {
+        ElMessage.error(`邮箱验证码发送失败：${e}`)
+        console.error(`邮箱验证码发送失败：${e}`)
+    }
+}
+
+/**
+ * 邮箱登录
+ */
+export const emailLogin = async(mailNumber, captcha) => {
+    try {
+        const postURL = login_api_url + `mailLogin`
+        const response = await axios.post(postURL, {
+            mailNumber: mailNumber,
+            captcha: captcha
+        }) 
+        console.log(`登录这里：${JSON.stringify(response)}`)
+        getAndRefreshToken(response)
+        return response.data.data
+    } catch (e) {
+        ElMessage.error(`邮箱登录失败：${e}`)
+        console.error(`邮箱登录失败：${e}`)
     }
 }
 

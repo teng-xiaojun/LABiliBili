@@ -3,7 +3,7 @@
         <div class="video-and-dissussion">
             <!--视频播放-->
             <div class="video-left left-box">
-                <videoMain :playInfo="playInfo" />
+                <videoMain />
             </div>
             <!--评论区-->
             <div class="discussion-panel">
@@ -19,10 +19,6 @@
 
 <script setup>
 import { ref, defineAsyncComponent } from "vue"
-import { useRoute } from 'vue-router'
-const route = useRoute()
-const isLike = ref(false) // 是否点赞过本视频
-const playInfo = ref()
 const videoMain = defineAsyncComponent(()=>
     import ('@/pages/videoDetail/VideoMain')
 )

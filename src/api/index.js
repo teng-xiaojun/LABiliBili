@@ -21,7 +21,7 @@ import { useRefreshToken } from '../store/token'
 /**
  * 1. 单个接口封装 request
  */
-var baseURL = '/api'
+var baseURL = '/api' // /api
 const request = axios.create({
     // url: 会加在baseURL后面（e.g./comment），除非是绝对地址
     baseURL: baseURL, 

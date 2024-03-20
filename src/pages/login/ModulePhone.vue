@@ -23,50 +23,32 @@
 <script setup>
 import { reactive } from 'vue'
 import { getPhoneCaptcha, sendPhoneLogin } from '@/api/login'
-import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+import { isMeetReg,setUser } from './loginCommon'
+import Debounce from '@/static/debounce'
+const captchaErrorStr = '短信验证码格式错误！'
+const debounce = new Debounce() // 防抖
+const router = useRouter()
 const param = reactive({
     phoneNumber: '',
     captcha: ''
 })
-const phoneRegStr = /^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|198|199|(147))\d{8}$/
-const captchaRegStr = /^\d{6}$/
-// 测试是否满足手机号正则表达式
-const isPhoneMeetReg = (phoneNumber) => {
-    // 验证手机号是否满足
-    if(phoneRegStr.test(phoneNumber) && phoneNumber.length === 11){
-        return true
-    } else {
-        ElMessage.error("手机号不满足大陆地区的规格！")
-        return false
-    }
-}
-// 验证码是否满足规格
-const isCaptchaMeetReg = (captcha) => {
-    if(captchaRegStr.test(captcha)) {
-        return true
-    } else {
-        ElMessage.error("验证码格式错误！")
-        return false
-    }
-}
-const updateCaptcha = () => {
-    if(isPhoneMeetReg(param.phoneNumber)) {
-        getPhoneCaptcha(param.phoneNumber)
+const updateCaptcha = async() => {
+    if(isMeetReg(0, param.phoneNumber, "")) {
+        await getPhoneCaptcha(param.phoneNumber)
     } 
 }
-const phoneLogin = () => {
-    if(isPhoneMeetReg(param.phoneNumber) && isCaptchaMeetReg(param.captcha)) {
-        sendPhoneLogin(param.phoneNumber, param.captcha)
+const phoneLogin = async() => {
+    if(isMeetReg(0, param.phoneNumber, "") && isMeetReg(1, param.captcha, captchaErrorStr)) {
+        await debounce.debounceEnd(5)
+        const loginRes = await sendPhoneLogin(param.phoneNumber, param.captcha)
+        if(setUser(loginRes)) {
+            router.push('/') // 跳转到首页
+        }
     }
 }
 </script>
 
 <style lang="scss" scoped>
 @import "@/assets/css/login.scss";
-.login-form {
-    padding-top: 1rem;
-}
-.login-area {
-    margin-top: 4rem;
-}
 </style>

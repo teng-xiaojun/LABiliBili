@@ -30,7 +30,7 @@ export const useChat = defineStore({
             return this.sessionId
         },
         setUpId(upId) {
-            this.currentUpId = currentUpId
+            this.currentUpId = upId
         },
         getUpId() {
             return this.currentUpId

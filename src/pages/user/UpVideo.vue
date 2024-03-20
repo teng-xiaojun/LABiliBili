@@ -171,7 +171,7 @@ const beforeCoverRemove = () => {
 
 }
 // 上传结果
-const upRes = () => {
+const upRes = async() => {
     // 数据结构
     const upFormData = new FormData()
     upFormData.append('file', upData.value.file)
@@ -180,7 +180,11 @@ const upRes = () => {
     upFormData.append('userId', userId)
     upFormData.append('videoCover', upData.value.cover)
     // 上传逻辑
-    const res = addUpVideo(upFormData)    
+    console.log(`上传数据`)
+    for (const pair of upFormData.entries()) {
+        console.log(pair[0] + ', ' + JSON.stringify(pair[1]));
+    }
+    const res = await addUpVideo(upFormData)    
     console.log("上传是否成功？", res)
 }
 onMounted(()=>{

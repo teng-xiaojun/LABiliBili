@@ -18,9 +18,11 @@
 import { ref, defineAsyncComponent, defineProps, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSearchKeys } from "@/store/searchKeys"
+import { useRefreshToken } from "@/store/token"
 import { ElMessage } from "element-plus"
 import axios from "axios"
 import Debounce from "@/static/debounce"
+const tokenStore = useRefreshToken() // 存储的token实例
 const isShow = ref(false) // 是否点击搜索栏
 const isInput = ref(false) // 是否正在输入
 const searchRes = ref() // input框中的数据
@@ -57,8 +59,16 @@ const getRecommend = async(keyword) => {
   if(keyword !== ""){
     // XXX 正常而言
     // const res = await fetchVideoRelatedKeywords(keyword) 
-    // const res = await fetchVideoSearchRes(keyword)
-    axios.get(`https://labilibili.com/search/likelyKeyWordSearch/${keyword}`).then(
+    axios.get(`https://labilibili.com/api/search/likelyKeyWordSearch/${keyword}`,{
+      keyword: keyword
+    },{
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'shortauthorization': tokenStore.getData(),
+        'laBiliBiliHeader': 'test_method_1',
+        'Access-Control-Allow-Origin': '*'
+      }
+    }).then(
       response => {
         recommendData.value = response.data.data
       }).catch(error =>console.error('Error loading captcha:',error))
@@ -77,8 +87,7 @@ watch(searchRes, (newValue, oldValue) => {
  * 搜索最终结果
  */
 const searchFinal = () => {
-  console.log("当前内容",JSON.stringify(searchRes.value))
-  if(!JSON.stringify(searchRes.value)){
+  if(!JSON.stringify(searchRes.value)||JSON.stringify(searchRes.value)===""){
     ElMessage.error("请输入内容！")
     return
   }

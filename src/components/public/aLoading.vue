@@ -17,14 +17,6 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue"
-console.log("成功导入了吗？")
-// const close = () => {
-//     document.querySelector().style.display = 'none'
-// }
-onMounted(()=>{
-    
-})
 </script>
 
 <style lang="scss" scoped>

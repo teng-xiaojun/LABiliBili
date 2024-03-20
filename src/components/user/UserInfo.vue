@@ -12,10 +12,10 @@
                 <p v-if="!isEditInfo" style="font-weight: 600; font-size: 1.2rem;">{{upInfo.name}}</p>
                 <aInput v-else :definedPlaceholder="'请输入名称'" class="modified-input"></aInput>
                 <div class="flex-based-container">
-                    <p style="margin-right: 1rem;" class="change-color-btn" @click="isFollow=1">关注数 {{upInfo.followingNum}}</p>
-                    <p style="margin-right: 1rem;" class="change-color-btn" @click="isFollow=2">粉丝数 {{upInfo.followersNum}}</p>
-                    <p style="margin-right: 1rem;">播放量 {{upInfo.playNum}}</p>
-                    <p style="margin-right: 1rem;">点赞量 {{upInfo.likeNum}}</p>
+                    <p v-if="upInfo.followingNum" style="margin-right: 1rem;" class="change-color-btn" @click="isFollow=1">关注数 {{upInfo.followingNum}}</p>
+                    <p v-if="upInfo.followersNum" style="margin-right: 1rem;" class="change-color-btn" @click="isFollow=2">粉丝数 {{upInfo.followersNum}}</p>
+                    <p v-if="upInfo.playNum" style="margin-right: 1rem;">播放量 {{upInfo.playNum}}</p>
+                    <p v-if="upInfo.likeNum" style="margin-right: 1rem;">点赞量 {{upInfo.likeNum}}</p>
                 </div>
                 <el-tooltip v-if="!isEditInfo" effect="light" placement="bottom" popper-class="user-all-intro">
                     <template #content>{{upInfo.intro}}</template>
@@ -31,14 +31,14 @@
         </div>
         <div class="flex-between-container">
             <el-button v-if="isEditInfo" type="primary" class="save-btn" @click="uploadFinal()">上传</el-button>
-            <followAndMessage />
+            <followAndMessage v-model:isFollowing="upInfo.isFollowing" :upId="upId" />
         </div>
         <!--上传头像的页面-->
         <div v-if="isuploadImg" class="" >
             <input id="upload-img" type="file" accept=".png, ,jpg" style="display: none" @input="handleFileChange">
         </div>
         <!--粉丝和关注列表-->
-        <followVue v-if="isFollow!=0" v-model:followType="isFollow" :upId="upInfo.id"  @update:follower-relationship="updateFollowType" />
+        <followVue v-if="isFollow!=0" v-model:followType="isFollow" :upId="upId"  @update:follower-relationship="updateFollowType" />
     </div>
 </template>
 
@@ -50,13 +50,11 @@ import { useUserInfo } from "@/store/userInfo"
 import followAndMessage from "./FollowAndMessage.vue"
 import aInput from '@/components/public/aInput.vue'
 import axios from "axios"
-const currentURL = window.location.href // 获取当前页面的URL
 const userInfo = useUserInfo() // 使用登录信息
 const userId = userInfo.getId() // 登录用户的id
-const upId = currentURL.match(/\/(\d+)$/)[1] // 获取当前个人页面的Id
 const isConfigShow = ref(true) // 是否能修改用户信息
 const isEditInfo = ref(false) // 是否修改了用户信息
-const isuploadImg = ref(true) // 是否上传了头像
+const upId = ref(0) // 查看的用户id：不能用const upId = currentURL.match(/\/(\d+)$/)[1] 获取当前个人页面的Id，因为只适配个人主页
 const isFollow = ref(0) // 是否能查看关注和粉丝列表，0是否，1是关注，2是粉丝
 const followVue = defineAsyncComponent(()=>
     import ("@/components/user/FollowerRel.vue")
@@ -69,7 +67,6 @@ const defaultUpInfo = {
   avatar: require("@/assets/img/avater.png"),
   intro: "个人的主页默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据默认数据",
   followingNum: 0,
-  fansNum: 333,
   followersNum: 999,
   playNum: 789,
   likeNum: 246,
@@ -87,13 +84,14 @@ const props = defineProps({
         type: Number,
         required: true,
         default: false
+    },
+    upInfo: {
+        type: Object,
+        required: false,
+        default: null
     }
 })
 const isBgShow = props.isBgShow
-// 刷新数据
-const getUserData = async() => { // 用户数据
-
-}
 const handleFileChange = (e) => {
     // 数据结构
     const fileAvatar = e.target.files[0]
@@ -125,11 +123,22 @@ const uploadAvatar = () => {
     imgInput.click()
 }
 onMounted(async()=>{
+    
+    upId.value = props.upId
     // 如果不是本人使用，关闭权限
-    if(userId!=upId) {
+    if(userId!=upId.value) {
         isConfigShow.value = false
+        // 验证权限
+
     }
-    upInfo.value = await fetchUserInfo(userId, upId)
+    // 如果有传入个人信息
+    if(props.upInfo) {
+        upInfo.value = props.upInfo
+        console.log(`${JSON.stringify(props.upInfo)}\nuserInfo接收数据:${JSON.stringify(upInfo.value)}`)
+    } else {
+        upInfo.value = await fetchUserInfo(userId, upId.value)
+    }
+    console.log(`验证关注情况${upInfo.value.isFollowing}`)
 })
 </script>
 

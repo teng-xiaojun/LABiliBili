@@ -14,6 +14,8 @@ module.exports = defineConfig({
       }
     }
   },
+  assetsDir: './',
+  publicPath: './',
   // configureWebpack: (config) => {
   //   // vue骨架屏插件配置
   //   config.plugins.push(new SkeletonWebpackPlugin({
@@ -30,9 +32,10 @@ module.exports = defineConfig({
   //     }
   //   }))
   // },
+  // productionSourceMap: false,
   devServer:{
     host: '127.0.0.12',
-    // port: 2023,
+    port: 2023,
     client:{
       webSocketURL: 'ws://127.0.0.12:2023/ws'
     },
@@ -45,7 +48,7 @@ module.exports = defineConfig({
       '/api': {
         // target: "yjgbfgsb.beesnat.com:13324", // 搜索
         // target: 'http://zsriw8kz.beesnat.com', // 视频
-        target: "http://www.labilibili.com",
+        target: "http://www.labilibili.com:80", // https://www.labilibili.com:82
         // target: 'http://114.55.116.140:10201/', 
         // 允许跨域：如果不开的话，会拦截响应
         changeOrigin: true,
@@ -61,5 +64,5 @@ module.exports = defineConfig({
         }
       }
     }
-  },
+  }
 })

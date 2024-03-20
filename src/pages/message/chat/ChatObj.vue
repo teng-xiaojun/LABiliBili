@@ -13,8 +13,8 @@
                     <el-scrollbar style="height: 90%;">
                     <div v-for="(item,index) in friendData" :key=index class="flex-center-container add-item" >
                         <img :src="item.cover" class="second-common-avatar" />
-                        <p>{{item.nickname.length>=4 ? item.nickname.substr(0,4)+"...": item.nickname}}</p>
-                        <el-button @click.stop="turnNewSession(item)">消息</el-button>
+                        <p style="margin: 0.2rem 0.3rem 0 0.3rem;">{{item.nickname.length>=4 ? item.nickname.substr(0,4)+"...": item.nickname}}</p>
+                        <el-button class="send-based-btn common-btn-center send-btn" @click.stop="turnNewSession(item)">消息</el-button>
                     </div>
                     </el-scrollbar>
                 </div>
@@ -25,7 +25,7 @@
         </div>
         <!--ChatGPT通道-->
         <div @click="bigModelTunnel()" class="chat-item flex-based-container"
-        :class="{'chat-clicked': isBigModel}"
+        :class="{'chat-clicked': currentPerson.upId===0}"
         >
             <img src="@/assets/img/utils/avatar_new_01.jpg" class="first-common-avatar chat-avatar" />
             <div class="flex-column-left-max-container">
@@ -72,24 +72,25 @@ import { ElMessage } from 'element-plus'
 const isAddSession = ref(false) // 是否添加会话
 const route = useRoute()
 const chatSession = useChat() // 使用聊天信息
-const isBigModel = ref(false) // 是否选择了星火大模型
 const userInfo = useUserInfo() // 使用登录信息
 const userId = userInfo.getId() // 登录用户的id
 const personList = ref([]) // 聊天对象列表
 const friendData = ref([]) // 好友列表
-const currentPerson = ref({
-    upId: 2, // 聊天对象的id
-    upName: "咸鱼1号", // 聊天对象的name
-    intro: "睡眠！！！！",
+const defaultBigModel = { // 默认是大模型的id
+    upId: 0, // 聊天对象的id
+    upName: "星火API", // 聊天对象的name
+    intro: "星火大模型伴你同行",
     avatar: require("@/assets/img/avater.png"), // 聊天对象的头像
-    leastMessage: "谢谢你的关注~",
+    leastMessage: "星火大模型伴你同行",
     leastMessageFrom: 2, // 0是不存在，1是自己，2是对方
     updatedUnreadFlag: true, // 是否有新的未读消息
     unreadNum: 1, // 未读新消息的条数 
-})
+}
+const currentPerson = ref(defaultBigModel)
 // 切到星火大模型
 const bigModelTunnel = () => {
-    isBigModel.value = true
+    currentPerson.value = defaultBigModel
+    chatSession.setCurrentUp(0, defaultBigModel.upName)
 }
 // 新增会话按钮
 const addSession = async() => {
@@ -97,7 +98,9 @@ const addSession = async() => {
     const followingArray = await fetchFollowingsList(userId)
     const followerArray = await fetchFollowersList(userId)
     const mergedArray = followingArray.concat(followerArray)
-    friendData.value = Array.from(new Set(mergedArray))
+    // friendData.value = Array.from(new Set(mergedArray))
+    friendData.value = [...new Set(mergedArray)]
+    console.log(`获取的好友${JSON.stringify(friendData.value)}`)
 }
 const isNeedNew = (upId) => {
     return personList.value.some(person=>person.upId !== upId)
@@ -144,14 +147,12 @@ const handleMaskClick = (event) => {
         isAddSession.value = false
     }
 }
-onBeforeMount(()=>{
-    
-})
 onMounted(async()=>{
     // 获得聊天对象列表
     personList.value = await fetchAllPeople(userId)
-    if(personList.value){
+    if(personList.value.length>0) {
         currentPerson.value = personList.value[0]
+        console.log(`看下获取的情况：${JSON.stringify(currentPerson.value)}`)
         if(!chatSession.getUpId() || chatSession.getUpId()===0) {
             chatSession.setUpId(currentPerson.value.upId)
         }
@@ -160,13 +161,14 @@ onMounted(async()=>{
         }
     }
     // 假如传来了当前聊天对象
-    if (route.query.receiverId) {
+    if (route &&route.query && route.query.receiverId) { // NOTE 使用route.query?没用，需要显式检查
         // 如果不存在，则新建
     } 
 })
 </script>
 
 <style lang="scss" scoped>
+@import "@/assets/css/messagePage.scss";
 @mixin func-btn {
     border-radius: 20px;
     &:hover,&:active {
@@ -236,6 +238,7 @@ onMounted(async()=>{
   .add-item {
     width: 100%;
     align-items: stretch;
+    margin-bottom: 0.5rem;
   }
 }
 .add-title {
@@ -249,5 +252,12 @@ onMounted(async()=>{
     .chat-item {
         width: 93%;
     }
+}
+.send-btn {
+    width: auto;
+    height: auto;
+    font-size: 0.9rem;
+    padding: 0.1rem 0.2rem;
+    color: #fff;
 }
 </style>

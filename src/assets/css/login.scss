@@ -1,4 +1,10 @@
 // 登录页所用样式
+.login-form {
+    padding-top: 1rem;
+}
+.login-area {
+    margin-top: 4rem;
+}
 .login-common-btn {
 	height: 2.8rem;
 	border: none;
@@ -23,6 +29,7 @@
 .login-input{
 	width: 24rem;
 	font-size: 1.2rem;
+	height: 3rem;
 }
 .login-input:first-child{
 	margin-bottom: 1.3rem;

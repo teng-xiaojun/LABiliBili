@@ -1,7 +1,7 @@
 <!--视频本体-->
 <template>
     <div class="flex-column-container">
-    <playerVue class="dplayer-wrap" :videoUrl="videoUrl" /> 
+    <playerVue class="dplayer-wrap" v-model:videoUrl="videoInfo.url" /> 
     <div class="video-info font-first-color">
         <div class="titleAndData flex-based-container">
             <h1>{{videoInfo.title}}</h1>
@@ -72,9 +72,9 @@
                 </div>
             </div>
             <!--视频的tags-->
-            <div v-if="videoInfo.tags" class="video-tags">
+            <div v-if="video_tags" class="video-tags">
                 <div class="video-tag-item tags-and-labels flex-based-container" 
-                v-for="(tag, index) in transferToList(videoInfo.tags)" :key="index" @click="searchRes(tag, 'tag')">{{tag}}</div>
+                v-for="(tag, index) in transferToList(video_tags)" :key="index" @click="searchRes(tag, 'tag')">{{tag}}</div>
             </div>
         </div>
     </div>
@@ -84,18 +84,18 @@
 </template>
 
 <script setup>
-import { ref,defineProps, defineAsyncComponent, onMounted, onUpdated } from "vue"
+import { ref,defineProps, defineAsyncComponent, onMounted, onBeforeMount } from "vue"
 import { getVideoDetail, addVideoHistory } from '@/api/video'
 import { addLike, deleteLike, fetchCollection } from "@/api/like_and_collect"
 import { ElMessage } from "element-plus"
 import { useRoute, useRouter } from 'vue-router'
 import { useUserInfo} from "@/store/userInfo"
+import playerVue from "@/components/video/Player.vue"
+let video_tags = "" // 本页面的标签信息
 const router = useRouter()
 const route = useRoute()
 const userInfo = useUserInfo() // 使用登录信息
 const userId = userInfo.getId() // 用户Id
-const currentURL = window.location.href
-const videoUrl = ref("") // 视频url
 const videoId = route.params.videoId // 当前视频Id
 const isLiked = ref(false) // 是否点赞过本视频
 const isClickCollect = ref(false) // 是否点击过收藏按钮
@@ -106,9 +106,9 @@ const isShare = ref(false) // 是否分享本页面
 const profileCard = defineAsyncComponent(()=>
     import ('@/components/user/ProfileCard.vue')
 ) 
-const playerVue  = defineAsyncComponent(()=>
-    import ('@/components/video/Player.vue')
-)
+// const playerVue  = defineAsyncComponent(()=>
+//     import ('@/components/video/Player.vue')
+// )
 const collectCard = defineAsyncComponent(()=>
     import ('@/components/collect/CollectCard.vue')
 )
@@ -121,11 +121,6 @@ const props = defineProps({
         type: Number,
         required: true,
         default: 0
-    },
-    videoUrl: {
-        type: String, 
-        required: true,
-        default: ""
     }
 })
 // 用户信息
@@ -141,6 +136,7 @@ const upInfo = ref({
  * 视频简介
  */
 const videoInfo = ref({
+    url: "",
     title:'HelloWorld', 
     intro:'加载失败，使用测试数据。高考大省的小城市考出来的，省排400，去了上海，感觉真的非常开阔眼界。如果不是因为在上海读的大学，我都不知道人生还有那么多种可能。就算早知道家庭条件不支持在上海买房，眼界的开阔也让我受益匪浅，最起码让我到了个买得起房的地方。', // 默认为空
     createtime:'2023-12-15',
@@ -167,11 +163,11 @@ const thumbsUp = async() => {
     if(isLiked.value) {
         isLiked.value = true
         videoInfo.value.likeCount += 1
-        await addLike(userId, 1, 'video')
+        await addLike(userId, videoId, 'video')
     }else{
         isLiked.value = false
         videoInfo.value.likeCount -= 1
-        await deleteLike(userId, 1, 'video')
+        await deleteLike(userId, videoId, 'video')
     }
 }
 /**
@@ -220,13 +216,15 @@ const refreshVideo = async() => {
     }
     // 收藏夹id列表
     const getData = await getVideoDetail(videoId, userId, collectIds)
-    if(getData) { // 加载好了后
-        videoInfo.value = getData
-        console.log(`获取视频详情数据${getData}`)
-        await addVideoHistory(videoId,userId)
+
+    if(getData.url===""){
+        ElMessage.error("视频url获取失败")
+        return 
     }
-    console.log("视频详情页测试", getData)
+    videoInfo.value = getData
+    await addVideoHistory(videoId,userId)
 }
+
 /**
  * 跳转
  */
@@ -240,15 +238,15 @@ const searchRes = (keyword, fromSource) => {
     })
     window.open(routeURL.href, '_blank')
 }
-onUpdated(()=>{
-
-})
-onMounted(()=>{
-    // 获取用户id和视频url    
-    videoUrl.value = route.query.videoUrl
+onBeforeMount(()=>{
+    // 获取up用户id
     upInfo.value.id = route.query.upId
     // 获取视频数据
     refreshVideo()
+})
+onMounted(()=>{
+    // 加入默认tags
+    video_tags = "'大学生', '计算机', '工作', '张雪峰','这就是真实生活力量', '生活','日常','程序员','生活记录','记录','生活万花筒 9.0 拥抱真实生活'"
 })
 </script>
 
@@ -257,7 +255,7 @@ onMounted(()=>{
 $right-distance: 1rem;
 $btn-height: 1.8rem;
 .video-info{
-    margin-top: 3.5rem;
+    margin-top: 5.5rem;
     margin-left: 1rem;
     position: static;
     height: auto;
@@ -301,7 +299,7 @@ $btn-height: 1.8rem;
 }
 @media screen and (min-width:1020px) {
     .video-info{
-        margin-top: 11rem;
+        margin-top: 14rem;
     }
     .titleAndData{
         width: 58rem;
