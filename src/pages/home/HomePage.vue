@@ -81,15 +81,15 @@ const noticeNum = ref({ // 各类消息通知的数量
   dynamicVideoCount: 1
 }) 
 const userInfo = useUserInfo() // 使用登录信息
+const userId = userInfo.getId()
 let user = {
-  id: userInfo.getId(),
+  id: userId,
   name: userInfo.getName(),
   avatar: userInfo.getAvatar()
 }
 const userAvatar =  ref(require("@/assets/img/user/black_user.jpeg"))
 const router = useRouter()
-const refreshTokenStore = useRefreshToken()
-const isLogin = refreshTokenStore.getData()!=='' &&  refreshTokenStore.getData() ? true: false
+const isLogin = userId > 0? true: false 
 const titleFunc = ["首页"] // "论坛", "直播", "商城"
 /**
  * 点击回到顶端

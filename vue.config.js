@@ -47,7 +47,7 @@ module.exports = defineConfig({
       '/api': {
         // target: "yjgbfgsb.beesnat.com:13324", // 搜索
         // target: 'http://zsriw8kz.beesnat.com', // 视频
-        target: "https://www.labilibili.com:82", // https://www.labilibili.com:82
+        target: "http://www.labilibili.com:80", // https://www.labilibili.com:82
         // target: 'http://114.55.116.140:10201/', 
         // 允许跨域：如果不开的话，会拦截响应
         changeOrigin: true,

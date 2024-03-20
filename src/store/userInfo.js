@@ -6,7 +6,7 @@ export const useUserInfo = defineStore({
     id: 'userStore',
     state: () => ({
         name: '咸鱼1号',
-        id: 100,
+        id: 0,
         avatar: require('@/assets/img/avater.png'), // 需要使用img标签
         // followingNum: 100,
         // followersNum: 50
