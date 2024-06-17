@@ -1,91 +1,205 @@
 <template>
+  <!--回到顶端的按钮-->
+  <div id="back-top-btn-id" class="back-top-btn detail-btn-chosen 
+  common-btn-center based-box" @click="scrollToTop()">返回顶部</div>
+  <div class="common-box">
+    <!--TODO：待删-->
+    <p>{{ logInfo }}</p>
+    <p>跳转至
+      <span @click="turnToBigModel()">大模型</span>
+    </p>
+  </div>
   <div class="main-page">
     <div class="first-level">
       <div class="recommendation">
-      <span class="recommendation-item" @click="turnToRank()"><div class="img-bg" style="background-color: #49a9f8;"><img src="@/assets/img/rank.svg" /></div><p>排 名</p></span>
-      <span class="recommendation-item" @click="turnToHot()"><div class="img-bg" style="background-color: rgb(205, 110, 252);"><img src="@/assets/img/fire.svg" /></div><p>热 门</p></span>
+      <span class="recommendation-item" @click="turnToRank()"><div class="img-bg" style="background-color: #49a9f8;">
+        <img src="@/assets/img/rank.svg" /></div><p>动 态</p></span>
+      <span class="recommendation-item" @click="turnToHot()"><div class="img-bg" style="background-color: rgb(205, 110, 252);">
+        <img src="@/assets/img/fire.svg" /></div><p>热 门</p></span>
       </div> 
-      <SearchPanel class="search-box"/>
+      <SearchPanel class="search-box flex-based-container"/>
     </div>
-    <template class="video-box">
+    <template id="video-box-id" class="video-box">
     <!--NOTE 设每行有4个元素-->
-          <video-small-wrap v-for="(item, index) in videoView" :key="index" :class="{'not-last-in-row':(index+1)%2!=0}">
-            <VideoCard :videoInfo="item" />
-          </video-small-wrap>
-        <!-- </DynamicScrollerItem> -->
-      <!-- </template> -->
+      <video-small-wrap v-for="(item, index) in videoView" :key="index">
+        <VideoCard :videoInfo="item" />
+      </video-small-wrap>
     </template>
     <footer style="margin-bottom: 5rem; color:#11457da9;">
-      您已看完所有视频~
+      <div v-if="downNew&&isRemain" style="height: 4rem;"><aLoadingVue /></div>
+      <div v-else> 您已看完所有视频~ </div>
     </footer>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
-import VideoCard from '@/components/VideoCard.vue'
-import VideoDetailList_test from '@/assets/data/videoViewList_test.json'
+import { onMounted, onBeforeUnmount, ref, watch, defineAsyncComponent } from 'vue'
+import VideoCard from '@/components/video/VideoCard.vue'
 import SearchPanel from '@/components/search/SearchPanel.vue'
+import VideoDetailList_test from '@/assets/data/videoViewList_test.json'
 import { useRouter } from "vue-router"
 import { getVideoBig } from "@/api/video"
+import { fetchUserInfo } from "@/api/user"
+import { useUserInfo } from '@/store/userInfo'
+import Debounce from '@/static/debounce'
+import { ElMessage } from 'element-plus'
+let startLoc = 1 // 当前位置0
+let probableData = [] // 可能放入的新数据
+let scrollToTopButton = document.getElementById('back-top-btn-id')
+const logInfo = '前端跑路了，临时工上任。正在紧急修bug。2024.6.17'
+const isRemain = ref(true) // 是否仍然有新数据
+const debounce = new Debounce() // 防抖
+const userInfo = useUserInfo() // 保存登录信息
+const userId = userInfo.getId()
+const eachTimeVideos = 10 // 每次获取的视频数
+const downNew = ref(false) // 触底加载
+// const isUpdating = ref(false) // 是否在处理触底加载
 const router = useRouter()
+const aLoadingVue = defineAsyncComponent(()=>
+  import ("@/components/public/aLoading")
+)
+// 跳转至大模型
+const turnToBigModel = () => {
+  const routeURL = router.resolve({
+    path: `/message/MyChat/${userId}`,
+  })
+  window.open(routeURL.href, '_blank')
+}
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth' // 使用smooth滚动效果，如果浏览器不支持，会自动回退到不带smooth的滚动
+  })
+}
+const scrollToTopByBtn = (elemDom) =>{
+  if(elemDom){ // NOTE 这里要用两层嵌套，1层的&&不够
+    if(isTop()){ // 为兼容浏览器，使用pageYOffset而非scrollY
+      elemDom.style.display = 'flex'
+    } else {
+      elemDom.style.display = 'none'
+    }
+  }
+}
+/**
+ * 获取视频数据
+ */
+const getData = async() => {
+  const tmp = await getVideoBig(startLoc) 
+  videoView.value = tmp || VideoDetailList_test
+}
+const updateData = async() => {
+  startLoc += eachTimeVideos
+  probableData = await getVideoBig(startLoc) 
+  downNew.value = false
+  if(probableData.length===0){
+    isRemain.value = false // 没有剩余数据了
+    ElMessage.success("休息下吧！没有更多数据了QAQ")
+    window.removeEventListener('scroll', loadWhenBottom)
+    return
+  }
+
+  // 过滤掉已存在videoView中的视频
+  let uniqueVideos = probableData.filter(video => 
+    !videoView.value.some(existingVideo => existingVideo.id === video.id)
+  )
+  videoView.value = [...videoView.value, ...uniqueVideos] // NOTE 使用push会有浅复制问题
+}
+watch(downNew, async() => {
+  await debounce.debounceEnd(7)
+  updateData()
+  window.addEventListener("updateWhenBottom", debounce) 
+})
+// 页面是否下滑
+const isTop = () => {
+  if(window.pageYOffset>100 || window.scrollY>100 || document.documentElement.scrollTop>100){
+    return true
+  }
+}
+/**
+ * 触底加载
+ */
+const loadWhenBottom = () => {
+  if(document.documentElement.clientHeight+window.scrollY >= document.documentElement.scrollHeight-10){
+    downNew.value = true
+  } else {
+    downNew.value = false
+  }
+} 
 /**
  * 视频展示实现
  *  */
 const videoView = ref([])  // NOTE 将传给子组件的
-// 获取视频数据
-onMounted(async()=>{
-  const tmp = await getVideoBig() 
-  videoView.value = tmp || VideoDetailList_test
-})
-
-/**
- * 滚动实现虚拟列表+懒加载
- *  */
-
 /**
  * 跳转HOT页面
  */
 const turnToHot = () => {
   router.push('/hot')
 }
-
 /**
- * 跳转Rank页面
+ * 跳转Rank（改为动态）页面
  */
 const turnToRank = () => {
-  router.push('/rank')
+  router.push('/trend')
 }
+/**
+ * 已登录的用户数据
+ */
+const getUserDetail = async(userId) => {
+  const loginUserInfo = await fetchUserInfo(userId, userId)
+  // console.log("啊", loginUserInfo)
+  userInfo.setAll(loginUserInfo.name, loginUserInfo.id, loginUserInfo.avatar )
+}
+// 获取数据
+onMounted(() => {
+  // 登录用户信息
+  if (userId>0) {
+    getUserDetail(userId)
+  } 
+  scrollToTopButton = document.getElementById('back-top-btn-id')
+  // 视频
+  getData()
+  // 返回顶部
+  window.addEventListener('scroll', () => scrollToTopByBtn(scrollToTopButton))
+  window.addEventListener('scroll', loadWhenBottom)
+})
+
+onBeforeUnmount(()=>{
+  window.removeEventListener('scroll', () => scrollToTopByBtn(scrollToTopButton))
+  window.removeEventListener('scroll', loadWhenBottom)
+})
+
 </script>
 
 <style scoped>
+@import "@/assets/css/videoBox.scss";
 .main-page{
   display: flex;
   flex-direction: column;
 }
-@media screen and (min-width:0px){
-  .first-level{
-    width: 5vw;
-  }
-  .recommendation .recommendation-item:first-child{
-  margin-left: 1.5rem;
-  margin-right: 2.5rem;
-  }
-  .video-box > video-small-wrap{
-    margin-top: 1rem;
-    margin-left: 1.5rem;
-    margin-right: 1.5rem;
-  }
+.back-top-btn {
+  position: fixed;
+  display: none;
+  color: #6392c3;
+  font-size: 1.2rem;
+  font-weight: 600;
+  width: 7rem;
+  height: 3rem;
+  top: 12rem;
+  right: 3rem;
+  z-index: 99;
+}
+.first-level{
+  width: 5vw;
+}
+.recommendation .recommendation-item:first-child{
+margin-left: 1.5rem;
+margin-right: 2.5rem;
 }
 @media screen and (min-width:1020px){
   .first-level{
     width: 102rem;
     margin-right: 2rem;
   } 
-  .video-box > video-small-wrap{
-    margin-left: 2.6rem;
-    margin-right: 2.6rem;
-  }
   .recommendation .recommendation-item:first-child{
     margin-left: 2rem;
     margin-right: 4rem;
@@ -134,26 +248,12 @@ const turnToRank = () => {
 .search-box{
   min-width: 33rem;
   height: 6rem;
-  display: flex;
-  align-items: center;
-  flex-flow:row nowrap;
   z-index: 5;
-}
-.video-box{
-  margin: 10rem 2rem;
-  min-height: 100%;
-  display: flex;
-  flex-wrap: wrap;
 }
 .recommendation > img{
   width: 2rem;
   height: 2rem;
   background: #000;
   border-radius: 50%;
-}
-
-/* 实现非最后一行的规则 */
-.video-box > video-small-wrap:not(:last-child){
-  margin-bottom: 2rem;
 }
 </style>

@@ -1,16 +1,18 @@
 <!--评论的顶层回复和对评论的回复-->
 <template>
     <div class="comment-form flex-center-container">
-        <img :src="getSendUser.avatar" class="send-user-avatar first-common-avatar" />
-    <div style="cursor: text;">
-        <textarea class="comment-area" v-model="content" placeholder="和谐的评论更能促进交流~" ></textarea>
-    </div>
-    <button class="send-comment-btn common-btn-center detail-btn" @click="sendComment()">发 布</button>
+        <img :src="getSendUser.avatar" 
+        class="send-user-avatar first-common-avatar" />
+        <div style="cursor: text;">
+            <textarea class="comment-area" 
+            v-model="content" placeholder="和谐的评论更能促进交流~" ></textarea>
+        </div>
+        <button class="send-comment-btn common-btn-center detail-btn" @click="sendComment()">发 布</button>
     </div>
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue'
+import { ref, defineProps, defineEmits, computed, onMounted } from 'vue'
 import { addComment } from '@/api/comment'
 import { ElMessage } from 'element-plus'
 const content =  ref('') //
@@ -22,7 +24,13 @@ const props = defineProps({
     }
 })
 const getSendUser = ref(props.value)
-
+const emits = defineEmits(['send:returnReply'])
+const replyComputed = computed({
+    get: () => content.value,
+    set: function(val) {
+        emits('send:returnReply', val)
+    }
+})
 /**
  * 评论发布功能
  */
@@ -30,9 +38,18 @@ const getSendUser = ref(props.value)
 const sendComment = async() => {
     // 验证评论
     
-    // 前端显示
-    
-    // 传递到后端
+    // 前端显示：要传递到CommentPanel中的列表里
+    replyComputed.value = {
+        id: 0,
+        avatar: getSendUser.value,
+        senderId: getSendUser.value,
+        senderName: "",
+        content: content.value,
+        createtime: "2024",
+        likeCount: 0,
+        isLike: false,
+    }
+    // 传递到后
     console.log('咕咕', content.value)
     const res = await addComment(content.value, 
         getSendUser.value.senderId, getSendUser.value.parentId, 
@@ -45,11 +62,17 @@ const sendComment = async() => {
         ElMessage.error('发布评论失败')
     }
 }
+onMounted(()=>{
+    // 
+    
+})
+
 </script>
 
 <style lang="scss" scoped>
 .comment-form{
     padding: 1rem 1rem;
+    height: 5rem;
 }
 .send-user-avatar{
     display: none;
