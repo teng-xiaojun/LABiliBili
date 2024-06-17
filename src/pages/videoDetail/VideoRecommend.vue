@@ -3,7 +3,8 @@
     <div class="flex-column-center-container">
         <!--显示集数-->
         <div v-if="otherCompilationsVideos!==null">
-            <div v-if="!isExpanseExposides" @click="isExpanseExposides=true" class="video-episodes flex-center-container based-box">
+            <div v-if="!isExpanseExposides" @click="isExpanseExposides=true" 
+            class="video-episodes flex-center-container based-box">
                 <p style="cursor: pointer;">显示视频集</p>
             </div>
             <div v-else class="video-episodes-panel flex-column-center-container based-box">
@@ -11,7 +12,8 @@
                 <div class="">
 
                 </div>
-                <p @click="isExpanseExposides=false" class="common-based-btn collapse-btn change-color-btn">收起</p>
+                <p @click="isExpanseExposides=false" 
+                class="common-based-btn collapse-btn change-color-btn">收起</p>
             </div>
         </div>
         <!--广告位-->
@@ -20,19 +22,14 @@
             <!-- <img src="@/assets/img/ad.png" alt="广告位" /> -->
         </div>
         <!--选择不同的栏目-->
-        <div class="video-category flex-center-container">
-            <button @click="prevSlide()" class="video-category-controller controller-left common-based-btn font-fifth-color">上一项</button>
-            <div class="video-category-item based-box common-based-btn" 
-            :class="item.id-1===currentIndex?'tags-and-labels':'recommend-labels'" 
-            v-for="(item, index) in visibleCategory" :key="index"
-            @click="changeRecommendType(item.id-1)"><!--NOTE 虽然@v-for不报错，但不能这么用。因为v-for是指令而非事件-->
-                {{item.name}}
-            </div>
-            <button @click="nextSlide()" class="video-category-controller controller-right common-based-btn font-fifth-color">下一项</button>
-        </div>
+        <aCarousel @updateIndex="updateIndex" :currentIndex="currentIndex" 
+        :itemsPerPage="itemsPerPage" 
+        :recommendCategory="recommendCategory"></aCarousel>
         <!--推荐视频-->
-        <div v-if="recommendVideos&&recommendVideos.length>0" class="video-recommend-content">
-            <div class="video-recommend-item" v-for="(item,index) in recommendVideos" :key="index">
+        <div v-if="recommendVideos&&recommendVideos.length>0" 
+            class="video-recommend-content">
+            <div class="video-recommend-item" 
+            v-for="(item,index) in recommendVideos" :key="index">
                 <recommendVue :videoInfo="item" :isUpDownFlag="false" class="recommend-item-detail" /> 
             </div>
         </div>
@@ -43,6 +40,7 @@
 import { ref, onMounted, computed, defineAsyncComponent } from "vue"
 import { getRecommendVideos, fetchVideosFromCompilations } from "@/api/video"
 import { useUserInfo } from "@/store/userInfo"
+import { aCarousel } from "@/components/public/aCarousel.vue"
 import { useRoute } from 'vue-router'
 const recommendVue = defineAsyncComponent(()=>
     import ("@/components/video/VideoCard.vue")
@@ -79,37 +77,13 @@ const recommendCategory = [{
     id: 5,
     name: '为你推荐'
 }]
-const visibleCategory = computed(() => {
-    // 根据当前索引和每页显示数量，计算轮播项
-    const start = currentIndex.value
-    const end = start + itemsPerPage;
-    let visibleData = recommendCategory.slice(start, end)
-    // 如果start过大
-    let i = 0
-    while(visibleData.length < itemsPerPage) {
-        visibleData.push(recommendCategory[i++])
-    } 
-    return visibleData
-})
-/**
- * 推荐相关的交互
- */
-// 切换推荐状态
-const changeRecommendType = (index) => {
-    currentIndex.value = index
+// 更新当前Index
+const updateIndex = (newIndex) => {
+    currentIndex.value = newIndex
 }
-// 推荐类型的滚动
-const prevSlide = () => {
-    currentIndex.value = (currentIndex.value - 1 + Math.ceil(recommendCategory.length)) % Math.ceil(recommendCategory.length )
-}
-const nextSlide = () => {
-    currentIndex.value = (currentIndex.value + 1) % recommendCategory.length
-}
-// 
 /**
  * 如果滚动到直播，则固定住
  */
-
 onMounted(async()=>{
     // 获取当前视频合集中其他视频
     otherCompilationsVideos.value = await fetchVideosFromCompilations(userId, videoId)

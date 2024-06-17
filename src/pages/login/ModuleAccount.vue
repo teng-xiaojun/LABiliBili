@@ -33,10 +33,13 @@
         </div>
         </div>
     </el-form>
+	<!--注册弹窗-->
+    <enrollCard /><!--v-model:enrollConfirm=XXX-->
 </template>
 
 <script setup>
-import { ref, onMounted, reactive} from 'vue'
+import { ref, onMounted, reactive, inject,
+	defineAsyncComponent, watch, provide } from 'vue'
 import { isMeetReg, setUser } from "./loginCommon"
 import { useRouter } from 'vue-router'
 import { getCaptcha, verifyLogin } from '@/api/login'
@@ -44,25 +47,56 @@ import { useUserInfo } from '@/store/userInfo'
 import { ElMessage } from "element-plus"
 import Debounce from '@/static/debounce'
 import Throttle from '@/static/throttle'
-const isEnroll = ref(false) // 选择注册
-const userInfo = useUserInfo() // 保存登录信息
 let captcha = ref('') 
+// const isEnrollProcess = inject('isEnrollVal') // 选择注册
+const isEnrollUpdate = ref(false) // 注册转递结果
+// const enrollEmitValue = inject('enrollData') // 注册信息
+// const enrollEmitValueData = ref(enrollEmitValue.getEnrollData())
+const userInfo = useUserInfo() // 保存登录信息
 const _captcha = ref('') // 验证码输入的值
 const router = useRouter()
 const debounce = new Debounce() // 防抖
 const captchaErrorStr = "账号验证码格式错误"
 const emailErrorStr = "账号格式错误"
+const isEnroll = ref(false) // 选择注册
+const enrollCard = defineAsyncComponent(()=>
+	import ('./EnRoll')
+)
+// 注册状态的通信
+provide('isEnrollVal', {
+	isEnroll,
+	setIsEnroll(val){
+		isEnroll.value = val
+	},
+	getIsEnroll() {
+		return isEnroll.value
+	}
+})
 
-// 向loginPage发送isEnroll的值
-const TrueEnroll = () => {
-	isEnroll.value=true
-	provide('isEnrollVal', {
-		isEnroll,
-		setIsEnroll(val){
-			isEnroll.value = val
-		}
-	})
-}
+// 注册信息
+const enrollData = ref({
+	username: '',
+	password: '',
+	userId: 1
+})
+// 注册信息获取
+provide('enrollData', {
+	enrollData, 
+	setEnrollData(val) {
+		enrollData.value = val
+	},
+	getEnrollData() {
+		return enrollData.value
+	}
+})
+provide('enrollStatus', {
+	upDateEnrollStatus(val) { // 是否在登录页完成
+		isEnrollUpdate.value = val
+	},
+	getEnrollStatus() {
+		return isEnrollUpdate.value
+	}
+})
 /**
  * 登录逻辑实现
  *  */ 
@@ -79,8 +113,12 @@ const updateCaptcha = async()=>{ // 更新验证码
 const throttle = new Throttle(updateCaptcha, 100)
 window.addEventListener("getCaptcha", throttle) 
 
+// 开始注册
+const TrueEnroll = () => {
+	isEnroll.value = true
+}
 // 确认登录
-const param = reactive({
+const param = ref({
 	username: 'admin',
 	password: '123456'
 })
@@ -102,9 +140,12 @@ const submitForm = async()=> {
 	}	
 	// 发送请求到后端，获取响应数据
 	const _captcha_ = window.JSON.stringify(_captcha.value)
-	const username_ = window.JSON.stringify(param.username) // window.JSON.stringify(xxx)
-	const password_ = window.JSON.stringify(param.password)
+	const username_ = window.JSON.stringify(param.value.username) // window.JSON.stringify(xxx)
+	const password_ = window.JSON.stringify(param.value.password)
+	console.log(`这里怎么处理的${username_}, ${password_}`)
 	const loginRes = await verifyLogin(username_, password_, _captcha_)
+	// 如果传递了注册信息
+
     if(!setUser(loginRes)){
 		updateCaptcha()
 	} else {
@@ -125,6 +166,14 @@ const rules = {
 }
 onMounted(()=>{
 	updateCaptcha()
+})
+// 获取注册信息   
+watch(enrollData, (newValue) => {
+	// 更新到页面上
+	console.log(`看下新值:${JSON.stringify(newValue)}`)
+	param.value.username = newValue.username
+	param.value.password = newValue.password
+	// enrollEmitValueData.value.userId
 })
 </script>
 

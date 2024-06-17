@@ -18,6 +18,7 @@ export const fetchAllComments = async(videoId, userId) => {
             userId: userId,
             type: 0
         })
+        console.log(`看下response:${JSON.stringify(response)}`)
         num_comments = response.commentCount
         response.commentResponseList.forEach((item)=>total_comments.push({
             id: item.id,
@@ -67,6 +68,7 @@ export const fetchAllComments = async(videoId, userId) => {
         ElMessage.error(`获取所有评论的回复错误：${e}`)
         console.error("获取所有评论的回复错误:", e)
     }
+    console.log(`看下评论数${num_comments}和所有评论${total_comments}`)
     return {
         commentCount: num_comments,
         commentData: total_comments
@@ -84,6 +86,7 @@ export const fetchAllComments = async(videoId, userId) => {
 export const addComment = async(content,senderId, parentId, receiverId, videoId) => {
     try{
         const postUrl = '/comment/comment'
+        console.log(`看下发表的评论`)
         await request.post(postUrl, {
             content: content,
             parentId: receiverId,

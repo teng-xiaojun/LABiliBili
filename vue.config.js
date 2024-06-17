@@ -47,13 +47,13 @@ module.exports = defineConfig({
       '/api': {
         // target: "yjgbfgsb.beesnat.com:13324", // 搜索
         // target: 'http://zsriw8kz.beesnat.com', // 视频
-        target: "http://www.labilibili.com:80", // https://www.labilibili.com:82
+        target: "https://www.labilibili.com", // https://www.labilibili.com:82
         // target: 'http://114.55.116.140:10201/', 
         // 允许跨域：如果不开的话，会拦截响应
         changeOrigin: true,
-        pathRewrite: {
-          '^/api': ''
-        }
+        // pathRewrite: {
+        //   '^/api': ''
+        // }
       },
       '/video-test': {
         target: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4',
@@ -61,7 +61,17 @@ module.exports = defineConfig({
         pathRewrite: {
           '^/video-show': ''
         }
-      }
+      },
+      '/apis/': {
+        target: 'https://www.labilibili.com/api',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/apis': ''
+        }
+      },
+      
+
+
     }
   }
 })

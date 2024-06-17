@@ -135,3 +135,14 @@ export const addNewChat = async(senderId, receiverId) => {
         console.error(`新建聊天会话失败：${e}`)
     }
 }
+
+
+export const getImage =  (url)=>{
+    console.log('333getImage');
+    return  request.get(url)
+}
+
+
+export const getPPT = (URL)=>{
+    return request.get(URL)
+}

@@ -1,11 +1,13 @@
 <!--评论的顶层回复和对评论的回复-->
 <template>
     <div class="comment-form flex-center-container">
-        <img :src="getSendUser.avatar" class="send-user-avatar first-common-avatar" />
-    <div style="cursor: text;">
-        <textarea class="comment-area" v-model="content" placeholder="和谐的评论更能促进交流~" ></textarea>
-    </div>
-    <button class="send-comment-btn common-btn-center detail-btn" @click="sendComment()">发 布</button>
+        <img :src="getSendUser.avatar" 
+        class="send-user-avatar first-common-avatar" />
+        <div style="cursor: text;">
+            <textarea class="comment-area" 
+            v-model="content" placeholder="和谐的评论更能促进交流~" ></textarea>
+        </div>
+        <button class="send-comment-btn common-btn-center detail-btn" @click="sendComment()">发 布</button>
     </div>
 </template>
 
@@ -22,11 +24,11 @@ const props = defineProps({
     }
 })
 const getSendUser = ref(props.value)
-const emits = defineEmits(['returnReply'])
+const emits = defineEmits(['send:returnReply'])
 const replyComputed = computed({
     get: () => content.value,
     set: function(val) {
-        emits('returnReply', val)
+        emits('send:returnReply', val)
     }
 })
 /**
@@ -70,6 +72,7 @@ onMounted(()=>{
 <style lang="scss" scoped>
 .comment-form{
     padding: 1rem 1rem;
+    height: 5rem;
 }
 .send-user-avatar{
     display: none;

@@ -198,5 +198,4 @@ window.imgOnError = function(imgElement){
     box-shadow: 0.2rem 0.2rem 20px 1px #89c0e4;
     border-radius: 15px;
 }
-
 </style>

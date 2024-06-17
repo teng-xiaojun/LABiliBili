@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, onBeforeRouteLeave } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { useUserInfo } from "@/store/userInfo"
 import { ElMessage } from 'element-plus'
 
@@ -127,7 +127,7 @@ const router = createRouter({
                     component: () => import('@/pages/user/NewTrend.vue')
                 },{
                     path: '/userCenter/uploadVideo/:userId',
-                    component: () => import('@/pages/user/UpVideo.vue')
+                    component: () => import('@/pages/user/upVideo/UpVideo.vue')
                 },{
                     path: '/userCenter/permission/:userId',
                     component: () => import('@/pages/user/PermissSet.vue')
@@ -205,7 +205,8 @@ router.beforeEach((to, from, next) => {
         if(userId>0) {
            next()
         } else {
-            ElMessage.error(`请登录后再继续操作`)
+            ElMessage.error(`请登录后再继续操作:${userId}`)
+            router.push('/login')
             if(window.opener!=null && !window.opener.closed) { // 通过window.open跳转
                 router.push('/403') // XXX 新打开页面用next转换无效
             } else {
@@ -217,14 +218,6 @@ router.beforeEach((to, from, next) => {
         next()
     } 
 })
-
-// TODO 分享外链-跳转？
-onBeforeRouteLeave((to, from, next) => {
-    if(unref()) {
-
-    }
-})
-
 // 视频详情页未登录只看30s的解决
 
 export default router

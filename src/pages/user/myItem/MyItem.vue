@@ -6,26 +6,29 @@
             <div class="my-single-title-wrap flex-between-container"><!--标题和展开-->
                 <div class="flex-left-container">
                     <p class="my-single-title font-first-color">{{videoPanel.title}}</p>
-                    <div v-if="isSelf&&videoPanel.title==='我的合集'||videoPanel.title==='我的收藏'" class="common-btn-center" 
+                    <div v-if="isSelf&&(videoPanel.title==='我的合集'||videoPanel.title==='我的收藏')" class="common-btn-center" 
                     style="width:1.48rem;height:1.48rem;border-radius:50%;margin-left:2rem;background-color: #6674f6;"
-                    @click="isOpenNew=true"
+                    @click="openFolder(index)"
                     >
                         <img src="@/assets/img/utils/plus.svg" style="width:0.8rem;height: 0.8rem;" />
                     </div>
                 </div>
-                <img src="@/assets/img/utils/rightArrow.svg" class="item-btn common-btn-center" @click="turnToMyDetail()" />
+                <img src="@/assets/img/utils/rightArrow.svg" class="item-btn common-btn-center" 
+                @click="turnToMyDetail()" />
             </div>
             <div class="my-single-content" >
                 <div v-if="data[index].length>0">
                     <el-scrollbar style="width:88%;">
                     <div v-if="videoPanel.isAllowed&&videoPanel.title!=='我的收藏'" class="flex-left-container">
                         <div v-for="(item, subIndex) in data[index]" :key="subIndex">
-                            <videoCardVue :videoInfo="item" style="width:20rem;height:14rem;margin:1rem 2rem 1.5rem 1rem;" />
+                            <videoCardVue :videoInfo="item" 
+                            style="width:20rem;height:14rem;margin:1rem 2rem 1.5rem 1rem;" />
                         </div>
                     </div>
                     <div v-else-if="videoPanel.isAllowed&&(videoPanel.title==='我的合集'||videoPanel.title==='我的收藏')">
                         <div v-for="(item, subIndex) in data[2]" :key="subIndex">
-                            {{item.name}}
+                            {{item}}
+                            
                         </div>
                     </div>
                     </el-scrollbar>
@@ -37,10 +40,8 @@
         </div>
         </el-scrollbar>
         <!--打开合集和收藏夹新建-->
-        <div v-if="isOpenNew">
-            <div style="position:fixed;">
-            <newCollectionVue />
-            </div>
+        <div v-if="isOpenNew" >
+            <newCollectionVue v-model:isShow="isOpenNew" v-model:isCollected="isCollectedVal" :isVideoDetail="false"/>
         </div>
     </div>
 </template>
@@ -50,6 +51,7 @@ import { reactive, ref, onMounted, computed, defineAsyncComponent } from "vue"
 import { fetchUpVideo, fetchVideoCompilations, fetchRecentLikeVideo } from "@/api/video"
 import { fetchCollection } from "@/api/like_and_collect"
 import { useUserInfo } from '@/store/userInfo'
+// import { ElMessage } from "element-plus"
 const videoCardVue = defineAsyncComponent(()=>
     import ("@/components/video/VideoCard.vue")
 )
@@ -60,6 +62,7 @@ const currentURL = window.location.href
 const parts = currentURL.split('/') // 当前url的分割数组
 const upId = parseInt(parts[parts.length-1]) // 最后一位upId
 const isOpenNew = ref(false) // 是否打开合集和收藏夹的新建
+const isCollectedVal = ref(true) // 打开的是否为收藏夹
 const data = ref([[],[],[],[]]) // 渲染的数据
 const userInfo = useUserInfo() // 保存登录信息
 const userId = userInfo.getId()
@@ -77,6 +80,13 @@ const personVideoData = reactive([{
     "isAllowed": true,
     "title": "最近点赞",
 }])
+// 打开合集或收藏夹
+const openFolder = (index) => {
+    if(index===1) {
+        isCollectedVal.value = false
+    }
+    isOpenNew.value = true
+}
 // 获取数据
 const getData = async(index) => {
     let data_ = []

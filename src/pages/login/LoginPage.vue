@@ -24,7 +24,7 @@
 					<p style="width">{{loginItem.name}}</p>
 				</div>
 				<div class="flex-center-container chose-tip">
-					<img src="@/assets/img/login/circle_decoration.svg" style="margin-right:0.4rem;animation:rotate 4s linear infinite;" />
+					<img src="@/assets/img/login/circle_decoration.svg" />
 					<p>点击非按钮位置返回</p>
 				</div>
 			</div>
@@ -47,17 +47,14 @@
 			</div>
 		</div>
 	</div>
-	<!--注册弹窗-->
-    <enrollCard style="width:40rem; height:35rem;" /><!--v-model:enrollConfirm=XXX-->
 </template>
 
 <script setup>
-import { ref, reactive, toRefs, defineAsyncComponent, provide } from 'vue'
+import { ref, reactive, toRefs,defineAsyncComponent } from 'vue'
 import { loadSlim } from "tsparticles-slim"
 import { particlesConfig } from './particlesConfig'
-const isEnroll = ref(false) // 选择注册
 const isChangeExpanse = ref(false)
-const currentTypeIndex = ref(2) // 三种登陆方式: 用0,1,2
+const currentTypeIndex = ref(0) // 三种登陆方式: 用0,1,2；先默认0
 const accountLogin = defineAsyncComponent(()=>
 	import ('./ModuleAccount')
 )
@@ -67,12 +64,6 @@ const phoneLogin = defineAsyncComponent(()=>
 const mailLogin = defineAsyncComponent(()=>
 	import ('./ModuleMail')
 )
-const enrollCard = defineAsyncComponent(()=>
-	import ('./EnRoll')
-)	
-// 监听是否为账密登录
-
-
 // 切换登录方式
 const loginMethod = [{
 	name: "手机号登录",
@@ -101,6 +92,9 @@ const particlesInit = async engine => {
 const particlesLoaded = async container => {
 	console.log('粒子背景加载成功，container：',container)
 }
+// watch(enrollData, (newValue) => {
+// 	enrollData.value = newValue	
+// })
 </script>
 
 <style lang="scss" scoped>
@@ -197,6 +191,10 @@ $small-border-radius: 10px;
 		@include login-method-text;
 		color: #fff;
 		margin-top: 5rem;
+		img {
+			margin-right:0.4rem;
+			animation:rotate 4s linear infinite;
+		}
 	}
 }
 .title{

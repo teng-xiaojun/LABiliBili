@@ -19,7 +19,7 @@
                 </div>
                 <!--点赞和收藏-->
                 <div class="likeAndCollect-wrap" @click="collect()">
-                    <div v-if="!isCollected" class="detail-btn likeAndCollect-item common-btn-between">
+                    <div v-if="!isShow" class="detail-btn likeAndCollect-item common-btn-between">
                         <img src="@/assets/img/utils/collect_notDone.svg" alt="收藏数" style="width: 1.3rem;" />
                         <span id="CollectNum">{{videoInfo.collectCount}}</span>
                     </div>
@@ -48,7 +48,8 @@
             </div>
         </div>
         <div class="video-author">
-            <profileCard v-if="isUpIntro" :avatar="upInfo.avatar" :id="userId" style="width:2rem; height:2rem;" />
+            <profileCard v-if="isUpIntro" :avatar="upInfo.avatar" :id="userId" 
+            style="width:2rem; height:2rem;" />
             <span class="nameAndFollows">
                 <div class="video-author-name">{{userInfo.getName()}}</div>
             </span>
@@ -63,23 +64,27 @@
                     <!--如果不是全屏，则不展示-->
                     <div v-if="!isExpandIntro">
                         <p class="long-text-collapsed intro-collapsed">{{videoInfo.intro}}</p>
-                        <div class="change-color-btn change-info-status-btn font-fifth-color" @click="isExpandIntro=true">展开</div>
+                        <div class="change-color-btn change-info-status-btn font-fifth-color" 
+                        @click="isExpandIntro=true">展开</div>
                     </div>
                     <div v-else class="intro-expanse">
                         <p class="long-text-expanded">{{videoInfo.intro}}</p>
-                        <div class="change-color-btn change-info-status-btn font-fifth-color" @click="isExpandIntro=false">收起</div>
+                        <div class="change-color-btn change-info-status-btn font-fifth-color" 
+                        @click="isExpandIntro=false">收起</div>
                     </div>
                 </div>
             </div>
             <!--视频的tags-->
             <div v-if="video_tags" class="video-tags">
                 <div class="video-tag-item tags-and-labels flex-based-container" 
-                v-for="(tag, index) in transferToList(video_tags)" :key="index" @click="searchRes(tag, 'tag')">{{tag}}</div>
+                v-for="(tag, index) in transferToList(video_tags)" 
+                :key="index" @click="searchRes(tag, 'tag')">{{tag}}</div>
             </div>
         </div>
     </div>
-    <!--弹窗-->
-    <collectCard :style="{'display':isClickCollect?'flex':'none'}" v-model:isCollected="isClickCollect" />
+    <!--收藏弹窗-->
+    <collectCard v-model:isShow="isClickCollect" :isCollected="true" :videoId="videoId"
+    :style="{'display':isClickCollect===true?'':'none'}" />
     </div>
 </template>
 
@@ -99,21 +104,18 @@ const userId = userInfo.getId() // 用户Id
 const videoId = route.params.videoId // 当前视频Id
 const isLiked = ref(false) // 是否点赞过本视频
 const isClickCollect = ref(false) // 是否点击过收藏按钮
-const isCollected = ref(false) // 是否收藏过本视频
+const isShow = ref(false) // 是否收藏过本视频
 const isUpIntro = ref(false) // 是否展开更多
 const isExpandIntro = ref(false) // 是否展开简介
 const isShare = ref(false) // 是否分享本页面
 const profileCard = defineAsyncComponent(()=>
-    import ('@/components/user/ProfileCard.vue')
+    import ('@/components/user/ProfileCard')
 ) 
-// const playerVue  = defineAsyncComponent(()=>
-//     import ('@/components/video/Player.vue')
-// )
 const collectCard = defineAsyncComponent(()=>
-    import ('@/components/collect/CollectCard.vue')
+    import ('@/components/collect/CollectCard')
 )
 const shareCard = defineAsyncComponent(()=>
-    import ('@/components/ShareCard.vue')
+    import ('@/components/ShareCard')
 )
 // 传递的
 const props = defineProps({
@@ -164,7 +166,7 @@ const thumbsUp = async() => {
         isLiked.value = true
         videoInfo.value.likeCount += 1
         await addLike(userId, videoId, 'video')
-    }else{
+    } else {
         isLiked.value = false
         videoInfo.value.likeCount -= 1
         await deleteLike(userId, videoId, 'video')
@@ -175,11 +177,11 @@ const thumbsUp = async() => {
  */
 const collect = () => {
     isClickCollect.value = true
-    if(isCollected.value){
-        isCollected.value = true
+    if(isShow.value){
+        isShow.value = true
         videoInfo.value.collect += 1
     }else{
-        isCollected.value = false
+        isShow.value = false
         videoInfo.value.collect -= 1
     }
 }
@@ -224,7 +226,6 @@ const refreshVideo = async() => {
     videoInfo.value = getData
     await addVideoHistory(videoId,userId)
 }
-
 /**
  * 跳转
  */

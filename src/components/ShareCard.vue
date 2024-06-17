@@ -101,7 +101,7 @@ const shareToFriend = (upId) => {
             }
          }
     })
-  window.open(routeURL.href, '_blank')
+    window.open(routeURL.href, '_blank')
 }
 // 将内容分享到其他地方
 const shareToOther = () => {

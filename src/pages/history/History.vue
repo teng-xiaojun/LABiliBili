@@ -76,7 +76,7 @@ const deleteHistory = (type, id, index) => { // type: 0单个，1为所有
         historyData.value.splice(index, 1)
         deleteVideoHistory(id, userId)
     } else if(type) { // 多选
-
+        
     } else {
         historyData.value.forEach((his) => {
             deleteVideoHistory(his.id, userId)

@@ -5,7 +5,7 @@
         <div class="user-content-title permiss-title">权限设置</div>
         <div class="permiss-wrap flex-column-center-container">
             <div v-for="(item, index) in upPermiss" :key="index" class="permiss-item flex-based-container">
-                <p style="margin-right: 2rem;color: #7b42b0;">{{item.name}}</p>
+                <p style="margin-right: 2rem; color: #7b42b0;">{{item.name}}</p>
                 <div class="user-content-slide-btn">
                     <p class="btn-based" :class="{'btn-chose':item.value}" @click="item.value=true">允许</p>
                     <p class="btn-based" :class="{'btn-chose':!item.value}" @click="item.value=false">不允许</p>

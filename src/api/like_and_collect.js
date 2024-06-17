@@ -111,68 +111,86 @@ export const fetchCollection = async(userId) =>{
 }
 
 /**
- * 将视频添加入某个收藏夹
+ * 查看收藏夹中的视频
+ */
+export const fetchVideoInCollect = async(userId) => {
+    try {
+        let postURL = basic_collect + `getCollectVideo/${userId}`
+        const response = await request.get(postURL, {
+            userId: userId
+        })
+        console.log(`验证收藏的视频:${response}`)
+        return response
+    } catch (e) {
+        ElMessage.error(`查看收藏夹中视频失败`)
+        console.log(`查看收藏夹中视频失败`)
+    }
+}
+
+/**
+ * 将视频添加入某个收藏夹或取出
  * 场景：@/Pages/videoDetail/VideoDetail
  * 请求字段：
  *  @param {number} 请求的对象用户id
  * 返回字段：
  *  @return {boolean} name 
  */
-export const addVideoToCollect = async(collectionId, videoId) => {
+export const editVideoToCollect = async(collectionId, videoId, type) => {
     try {
-        const postURL = basic_collect + 'collect'
+        let postURL = basic_collect
+        if(type===0) {
+            postURL = basic_collect + 'collect' // 收藏
+        } else {
+            postURL = basic_collect + 'recallCollect' // 取消收藏
+        }
         const response = await request.post(postURL, {
             collectGroupId: collectionId,
             videoId: videoId
         })
         return response
     }catch(e){
-        ElMessage.error(`将视频加入收藏夹（id：${collectionId}）失败：${e}`)
-        console.error(`将视频加入收藏夹（id：${collectionId}）失败：${e}`)
+        if(type===0) {
+            ElMessage.error(`将视频加入收藏夹（id：${collectionId}）失败：${e}`)
+            console.error(`将视频加入收藏夹（id：${collectionId}）失败：${e}`)
+        } else {
+            ElMessage.error(`将视频取消收藏夹（id：${collectionId}）失败：${e}`)
+            console.error(`将视频取消收藏夹（id：${collectionId}）失败：${e}`)
+        }
     }
 }
 
 /**
- * 将视频从某个收藏夹中取出
+ * 创建，修改收藏夹
  */
-export const removeVideoFromCollect = async() => {
+export const addCollection = async(collectionName, userId, collectionId) => {
     try {
-
-    }catch(e){
-        console.error("将视频从收藏夹取出失败", e)
+        const postURL = basic_collect + 'editCollectGroup'
+        const response = await request.post(postURL, {
+            ...(collectionId && { id: collectionId }),   
+            name: collectionName,
+            userId: userId
+        })
+        return response
+    } catch (e) {
+        ElMessage.error(`创建收藏夹失败${e}`)
+        console.error(`创建收藏夹失败${e}`)
     }
-}
-
-/**
- * 创建收藏夹
- */
-export const addCollection = async(userId, collectionName, collectionId) => {
-    const postURL = basic_collect + 'editCollectGroup'
-    const response = await response.post(postURL, {
-        id: userId,
-        name: collectionName,
-        id: collectionId    
-    })
 }
 
 /**
  * 删除收藏夹
  */
-export const deleteCollections = async() => {
+export const deleteCollections = async(collectionId, collectionName, userId) => {
     try {
-        const getURL = basic_collect + 'deleteCollectGroup'
+        const postURL = basic_collect + 'deleteCollectGroup'
+        const response = await request.post(postURL, {  
+            id: collectionId,
+            name: collectionName,
+            userId: userId
+        })
+        return response
     }catch(e) {
-        console.error("获取收藏夹失败", e)
-    }
-}
-
-/**
- * 修改收藏夹
- */
-export const editCollections = async() => {
-    try {
-        const getURL = basic_collect + 'deleteCollectGroup'
-    }catch(e) {
-        console.error("获取收藏夹失败", e)
+        ElMessage.error("删除收藏夹失败", e)
+        console.error("删除收藏夹失败", e)
     }
 }

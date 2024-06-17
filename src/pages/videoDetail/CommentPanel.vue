@@ -10,22 +10,22 @@
         </span>
         <p :style="{'color': hotAndNew===0?'rgba(17, 69, 125, 0.662745098)':'',
             'font-weight':hotAndNew===0?'600':''
-        }" @click="hotAndNew=0">最新</p>
+        }" @click="hotAndNew=0" style="cursor: pointer;">最新</p>
         <div class="part-item font-second-color">|</div>
         <p :style="{'color': hotAndNew===1?'rgba(17, 69, 125, 0.662745098)':'',
             'font-weight':hotAndNew===1?'600':''
-        }"  @click="hotAndNew=1">最热</p>
+        }"  @click="hotAndNew=1" style="cursor: pointer;">最热</p>
     </div>
     <!--评论发布区-->
     <div class="create-comment-panel">
-        <replyVue :value="sendUser" @xxx="getNewComment()" />
+        <replyVue :value="sendUser" @send:returnReply="getNewComment()" />
     </div>
     <!--评论展示区-->
     <div v-if="commentsList&&commentsList.length>0" class="flex-column-center-container">
         <div class="comment-item" v-for="(item,index) in commentsList" :key="index">
             <commentVue :commentInfo="item" :type="'top'" :videoId="videoId" />
             <!--显示该评论的children-->
-            <div v-if="item.replyIdList.length>0" class="comment-replys-panel">
+            <div v-if="item&&item.replyIdList.length>0" class="comment-replys-panel">
                 <div class="children-bg">
                     <div v-for="(child,index) in item.replyIdList" :key="index">
                         <commentVue :commentInfo="child" :type="'nest'" :videoId="videoId" />
@@ -59,8 +59,8 @@ const commentNum = ref(999) // 评论总数
 // 向下一级子组件传递的评论发布区数据
 const sendUser = {
     senderId: 0, // 当前登录用户id
-    parentId: null,
-    receiverId: null,
+    parentId: 0, // null好像不行？
+    receiverId: 0, // null好像不行？
     videoId: videoId,
     avatar: require("@/assets/img/avater.png")
 }
@@ -107,8 +107,9 @@ const data_test = [{
     replyIdList:[]
 }]
 let commentsList = reactive([])
-const getNewComment = (topReply) => {
-    commentsList.push(topReply)
+const getNewComment = (toReply) => {
+    console.log(`获取到了什么评论：${toReply}`)
+    commentsList.push(toReply)
 }
 onMounted(async()=>{
     const video_content = await fetchAllComments(videoId, userId)

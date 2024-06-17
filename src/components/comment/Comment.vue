@@ -4,7 +4,7 @@
         <div class="comment-info">
             <div v-if="getCommentType==='top'">
                 <div class="flex-based-container">
-                    <img v-lazy="getCommentInfo.avatar" class="user-avatar first-common-avatar" />
+                    <!-- <img v-lazy="getCommentInfo.avatar" class="user-avatar first-common-avatar" /> -->
                     <div class="info-item comment-username font-first-color">{{getCommentInfo.senderName}}</div>
                     <div class="edit-function" v-if="isEdit">
                         <el-dropdown @command="handleEdit">
@@ -21,7 +21,7 @@
                 <div class="info-item comment-content font-third-color">{{getCommentInfo.content}}</div>
             </div>
             <div v-else class="flex-based-container">
-                <img v-lazy="getCommentInfo.avatar" class="user-avatar second-common-avatar" />
+                <!-- <img v-lazy="getCommentInfo.avatar" class="user-avatar second-common-avatar" /> -->
                 <div class="info-item comment-username">
                     <span class="font-second-color">{{getCommentInfo.senderName}}</span> 回复 <span class="font-second-color">{{getCommentInfo.receiverName}}</span> </div>
                 <div class="info-item comment-content reply-content font-fifth-color">{{getCommentInfo.content}}</div>

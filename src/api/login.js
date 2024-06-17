@@ -51,11 +51,13 @@ export const getCaptcha = async () => {
  */
 export const verifyLogin = async (userName, password, captcha) => {
     try {
+        console.log(`嘿嘿1-？${userName}, ${password},${captcha}`)
         const response = await axios.post(login_api_url+'passwordLogin', {
             userName: userName,
             password: password,
             captcha: captcha
         })
+        console.log(`嘿嘿2-？`)
         getAndRefreshToken(response)
         return response.data.data
     } catch (e) {
@@ -69,15 +71,15 @@ export const verifyLogin = async (userName, password, captcha) => {
  */
 export const enroll = async(username, nickName, password, phoneNum, captcha, avatar) => {
     try {
-        const postURL = '/register/register'
+        const postURL = '/register/passwordRegister'
         const response = await request.post(postURL, {
             username: username,
             nickName: nickName,
             password: password,
             phoneNum: phoneNum,
             captcha: captcha,
-            avatar: avatar
         })
+        
         return response
     } catch (e) {
         console.error('注册错误', e)

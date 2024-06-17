@@ -2,6 +2,8 @@
 <template>
     <el-form :model="param" ref="login" label-width="0px" class="login-form">
         <div class="login-account">
+        <!--TODO：待删-->
+        <p style="margin-top: -1rem; margin-bottom: 1rem;">* 未注册用户登陆后将会自动注册</p>
         <el-form-item prop="username">
             <el-input class="login-input" v-model="param.phoneNumber" placeholder="请输入中国地区的手机号">
                 <template #prepend>

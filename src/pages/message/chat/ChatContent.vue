@@ -1,9 +1,11 @@
 <!--右侧聊天框-->
 <template>
     <div class="chat-box">
+       
         <div class="chat-history">
+
             <el-scrollbar v-if="chatData" style="height: 100%;">
-            <div v-for="(chatItem, index) in chatData" :key="index">
+            <div v-for="(chatItem, index) in chatData" :key="index" v-show="chatItem.type == props.type">
                 <div class="chat-history-item left-side flex-based-container"
                 :class="{
                     'left-side': chatItem.upId!==userId,
@@ -17,9 +19,21 @@
                     class="chat-item-bg chat-item-bg-other">
                     <p v-if="chatItem.upId!==0">{{ chatItem.content }}</p><!---->
                     <div v-else>
-                        <p v-for="(char, index) in chatItem.content" :key="index" 
-                        :style="{ animationDelay: `${index * 0.15}s`}" class="fade-son-box">{{ char }}</p>
-                    </div> 
+                        <template v-if="chatItem.type == '0'">
+                        <p >{{ chatItem.content }}</p>
+                        </template>
+                        <template v-if="chatItem.type == '1'">
+                            <img :src="chatItem.content" alt="" style="width: 100%;">
+                        </template>
+                        <template v-if="chatItem.type == '2'">
+                        <img :src="chatItem.imgSrc" alt="" style="width: 100%;">
+                            <template v-for="(i,index) in chatItem.content" :key="index">
+                            <h1 v-show="i.index.split('.').length == 1" style="font-size: 20px;">{{ i.themeName }}</h1>
+                            <h2 v-show="i.index.split('.').length == 2" style="font-size: 16px;">{{ i.themeName }}</h2>
+                            <p v-show="i.index.split('.').length == 2" style="font-size: 14px;">{{ i.text }}</p>
+                            </template>
+                        </template>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -39,7 +53,7 @@
             <textarea class="chat-input-middle" v-model="reply"></textarea>
             <!--确认发送框-->
             <div class="chat-input-last">
-                <el-button type="primary" class="common-btn-center send-btn send-based-btn" @click="submitReply()">发送</el-button>
+                <el-button type="primary" class="common-btn-center send-btn send-based-btn" @click="submit()" :loading="loading">发送</el-button>
             </div>
         </div>
     </div>
@@ -47,12 +61,14 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, defineProps, watch } from "vue"
-import { fetchChatHistory, addReply, changeSessionTime, editChatToRead } from "@/api/chat"
+import { fetchChatHistory, addReply, changeSessionTime, editChatToRead, getImage, getPPT } from "@/api/chat"
 import { useChat } from "@/store/chat"
 import { useUserInfo } from "@/store/userInfo"
 import { ElMessage } from "element-plus"
 import { useRoute } from "vue-router"
-import ProfileCard from "@/components/user/ProfileCard.vue"
+import { inject } from 'vue'
+import ProfileCard from "@/components/user/ProfileCard.vue";
+import axios from 'axios' 
 const chatSession = useChat() // 使用聊天信息
 const userInfo = useUserInfo() // 使用登录信息
 const userId = userInfo.getId() // 登录用户的id
@@ -60,61 +76,100 @@ const chatData = ref([]) // 用户聊天的记录
 const bigModelData = ref('') // 大模型发的消息
 const reply = ref('') // 发送消息框
 const route = useRoute()
-let currentPerId = chatSession.getCurrentUp()[0]
 // 对方用户
-const currentPerson = ref({
-    tunnelId: 0,
-    upId: 1, // 聊天对象的id
-    upName: "咸鱼1号", // 聊天对象的name
-    intro: "睡眠！！！！",
+// const currentPerson = inject("chatting")
+const bigModelTest = {
+    upId: 0, // 聊天对象的id
+    upName: "星火API", // 聊天对象的name
+    intro: "星火大模型伴你同行",
     avatar: require("@/assets/img/avater.png"), // 聊天对象的头像
-    leastMessage: "谢谢你的关注~",
-    leastMessageFrom: 2, // 0是不存在，1是自己，2是对方
-    updatedUnreadFlag: true, // 是否有新的未读消息
-    unreadNum: 1, // 未读新消息的条数 
-})
+    leastMessage: "星火大模型伴你同行",
+    leastMessageFrom: 0, // 0是不存在，1是自己，2是对方
+    updatedUnreadFlag: false, // 是否有新的未读消息
+    unreadNum: 0, // 未读新消息的条数 
+}
+const currentPerson = ref(bigModelTest)
 // 获取分享的内容
 const props = defineProps({
     receiverContent: {
         type: String,
         required: false,
         default: null
+    },
+    type:{
+        type:String,
+        default:'0'
     }
 })
 /**
  * WebSocket连接
  */
 // 获取当前用户聊天
-const tmp = chatSession.getCurrentUp()
-currentPerson.value.upId = tmp[0]
-currentPerson.value.upName = tmp[1]
 // 初始化websocket
 // if(socket) {
 //     await socket.close()
 // }
-const socket = new WebSocket("ws://120.55.85.249:1688/ljl/bilibili/chat") // XXX 先用这个socket
+const socket = new WebSocket("wss://labilibili.com/wschat") // XXX 先用这个socket
+let conId = ''
+
+const getImageData = async (val)=>{
+    reply.value = ''
+   let res = await axios.get('/api/chat/getImage/' + val);
+//    console.log(res);
+    return res;
+}
+// getImageData()
+
 socket.onmessage = (event) => {
+    console.log('111',event);
     let message = JSON.parse(event.data)
+
     if(message.type === 'sessionId') {
         chatSession.setSessionId(message.sessionId)
     } else if(message.type === 'message') {
         chatData.value.push({
             id: message.id,
             createTime: message.createTime,
-            upId: currentPerId,
-            content: message.content
+            upId: currentPerson.value.upId,
+            content: message.content,
         })
     } else if(message.type === 'bigmodel') {
-        if(message.status === 0 || message.status === 1 ) {
-            bigModelData.value += message.content
-        } else {
+         
+        if(message.status === 0){
+            // bigModelData.value += message.content 
+            conId = Date.now() + 123123131;
             chatData.value.push({
                 id: 0,
                 createTime: new Date(),
-                upId: currentPerId,
-                content: bigModelData.value
+                upId: currentPerson.value.upId,
+                content: message.content,
+                uuid:conId,
+                type:'0',
+                success:false,
+        })
+        console.log('333',chatData.value);
+
+            
+        }else if( message.status === 1 ) {
+            chatData.value.forEach((item)=>{
+                if(item.uuid == conId){
+                    item.content +=  message.content 
+                }
             })
-            bigModelData.value = ''
+
+
+        } else {
+            chatData.value.forEach((item)=>{
+                if(item.uuid == conId){
+                    item.content +=  message.content ;
+                    item.success = true
+                }
+            })
+            console.log('3',currentPerson.value.upId);
+            conId = ''
+            console.log(chatData.value);
+
+            // bigModelData.value = ''
         }
     }
 }
@@ -125,6 +180,7 @@ socket.onopen = (event) => { // 初始化时调用
         type: "init",
         chattingWith: "receiverId"
     }
+    console.log(Date.now());
     socket.send(JSON.stringify(initMessage))
 }
 // 连接出错时的事件处理
@@ -138,13 +194,14 @@ socket.onclose = function(event) {
 }
 // 获取历史聊天数据
 const getData = async() => {
-    if(currentPerson.value.upId !== 0) {
-        chatData.value = await fetchChatHistory(userId, currentPerId)
+    if(currentPerson.value.upId !==undefined) {
+        chatData.value = await fetchChatHistory(userId, currentPerson.value.upId)
         currentPerson.value.upId = chatData.value[0].upId
     }
 }
-// 发送消息
+// 发送文本消息
 const submitReply = async() => {
+    console.log(WebSocket.OPEN);
     try {
         if (socket && socket.readyState === WebSocket.OPEN && reply.value!=='') {
             let message = {}
@@ -159,23 +216,24 @@ const submitReply = async() => {
                     type: "message", // 指定消息类型为"message"
                     content: reply.value,
                     userId: userId.toString(),
-                    receiverId: parseInt(currentPerId).toString() // 发送的对象
+                    receiverId: parseInt(currentPerson.value.upId).toString() // 发送的对象
                 }
             }
             console.error(`message: ${JSON.stringify(message)}`)
             socket.send(JSON.stringify(message)) // 将消息对象转换为JSON字符串并发送
             const replyRes = true
-            if(currentPerId!==0)
-                replyRes = await addReply(reply.value, userId, currentPerId)
+            if(currentPerson.value.upId!==0)
+                replyRes = await addReply(reply.value, userId, currentPerson.value.upId)
             if(replyRes) {
-                if(currentPerId!==0)
-                    await changeSessionTime(userId, currentPerId, reply.value)
+                if(currentPerson.value.upId!==0)
+                    await changeSessionTime(userId, currentPerson.value.upId, reply.value)
                 chatData.value.push({
                     id: 99999,
                     createTime: new Date(),
                     upId: userId,
                     content: reply.value,
-                    leastMessage: reply.value
+                    leastMessage: reply.value,
+                    type:'0'
                 })
                 reply.value = ''
             } else {
@@ -190,11 +248,101 @@ const submitReply = async() => {
         console.error(`遇到问题${e}`)
     }
 }
+let loading = ref(false)
+//发送图片消息
+const subImage = async()=>{
+    if(!reply.value) return 
+
+    chatData.value.push({
+                    id: 99999,
+                    createTime: new Date(),
+                    upId: userId,
+                    content: reply.value,
+                    leastMessage: reply.value,
+                    type:'1'
+                })
+              
+
+    let res = await getImageData(reply.value);
+   
+    console.log(res);
+    if(res.status === 200){
+        // console.log(res.data);
+        let message = 'data:image/png;base64,'
+        chatData.value.push({
+                    id: 0,
+                    createTime: new Date(),
+                    upId: currentPerson.value.upId,
+                    // content: reply.value,
+                    content:message + res.data,
+                    type:'1'
+                })
+              
+    }
+}
+
+//获取PPT信息
+const getPPtData =async (val)=>{
+    reply.value = ''
+    let res = await axios.get('/api/chat/getPPT/'+val);
+    return res
+    // console.log(res);
+}
+// getPPtData('写一篇关于前端的ppt')
+//发送PPT消息
+const subPPt = async ()=>{
+    if(!reply.value)return
+
+    chatData.value.push({
+                    id: 99999,
+                    createTime: new Date(),
+                    upId: userId,
+                    content: reply.value,
+                    leastMessage: reply.value,
+                    type:'2'
+                })
+     let res = await getPPtData(reply.value) ;
+     if(res.status==200){
+        console.log(res.data);
+        let imgSrc = res.data.coverImgSrc;
+        
+        chatData.value.push({
+                    id: 0,
+                    createTime: new Date(),
+                    upId: currentPerson.value.upId,
+                    // content: reply.value,
+                    content: res.data.pptWordList,
+                    type:'2',
+                    imgSrc: imgSrc
+                })
+     }          
+}
+
+//发送用户提问信息
+const submit = ()=>{
+    if(props.type == '0'){
+        //w文本
+       
+        submitReply()
+
+    }else if(props.type == '1'){
+        //图片
+     
+        loading.value = true
+        subImage()
+        loading.value = false
+
+    }else if (props.type == '2'){
+        //ppt
+        subPPt()
+    }
+}
+
 // 捕捉session缓存是否变化
-watch(chatSession, async() => {
-    currentPerId = chatSession.getCurrentUp()[0]
+watch(()=>currentPerson, async() => {
+    currentPerson.value.upId = currentPerson[0]
     await getData() // 重新渲染
-    await editChatToRead(userId, currentPerId) 
+    await editChatToRead(userId, currentPerson.value.upId) 
 }, {deep: true})
 onMounted(async()=>{
     // 获取当前
@@ -202,9 +350,9 @@ onMounted(async()=>{
         reply.value = route.query.receiverContent // TODO继续优化到下一步
     }
     // 获取聊天的历史数据
-    if(currentPerId!=0) {
+    if(currentPerson.value.upId!==0) {
         await getData()
-        await editChatToRead(userId, currentPerId) // 0时未读
+        await editChatToRead(userId, currentPerson.value.upId) // 0时未读
     }
 })
 onBeforeUnmount(async()=>{

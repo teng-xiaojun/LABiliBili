@@ -62,17 +62,16 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeMount, ref, defineProps } from 'vue'
+import { onMounted, onBeforeMount, ref, inject, defineProps } from 'vue'
 import { fetchAllPeople, addNewChat, changeSessionTime } from "@/api/chat"
 import { fetchFollowingsList, fetchFollowersList } from "@/api/user"
 import { useUserInfo } from "@/store/userInfo"
 import { useChat } from "@/store/chat"
 import { useRoute } from "vue-router"
-import { ElMessage } from 'element-plus'
 const isAddSession = ref(false) // 是否添加会话
 const route = useRoute()
 const chatSession = useChat() // 使用聊天信息
-const userInfo = useUserInfo() // 使用登录信息
+const userInfo = useUserInfo() // 使用登录信息 
 const userId = userInfo.getId() // 登录用户的id
 const personList = ref([]) // 聊天对象列表
 const friendData = ref([]) // 好友列表
@@ -86,11 +85,23 @@ const defaultBigModel = { // 默认是大模型的id
     updatedUnreadFlag: true, // 是否有新的未读消息
     unreadNum: 1, // 未读新消息的条数 
 }
-const currentPerson = ref(defaultBigModel)
+const currentPerson = ref(defaultBigModel) // 当前用户
+// 修改用户
+// const updateChat = inject("updateChat")
 // 切到星火大模型
 const bigModelTunnel = () => {
     currentPerson.value = defaultBigModel
     chatSession.setCurrentUp(0, defaultBigModel.upName)
+    updateChat({
+        upId: 0, // 聊天对象的id
+        upName: "星火API", // 聊天对象的name
+        intro: "星火大模型伴你同行",
+        avatar: require("@/assets/img/avater.png"), // 聊天对象的头像
+        leastMessage: "星火大模型伴你同行",
+        leastMessageFrom: 0, // 0是不存在，1是自己，2是对方
+        updatedUnreadFlag: false, // 是否有新的未读消息
+        unreadNum: 0, // 未读新消息的条数 
+    })
 }
 // 新增会话按钮
 const addSession = async() => {
@@ -139,6 +150,7 @@ const changeTunnel = (Tunnel) => {
     if(Tunnel.upId!==currentPerson.upId) {
         currentPerson.value = Tunnel // 当前对象的新值
         chatSession.setCurrentUp(Tunnel.upId, Tunnel.upName) //  
+        updateChat(Tunnel)
     }
 }
 // 点击蒙版外的会退出弹窗
@@ -152,7 +164,6 @@ onMounted(async()=>{
     personList.value = await fetchAllPeople(userId)
     if(personList.value.length>0) {
         currentPerson.value = personList.value[0]
-        console.log(`看下获取的情况：${JSON.stringify(currentPerson.value)}`)
         if(!chatSession.getUpId() || chatSession.getUpId()===0) {
             chatSession.setUpId(currentPerson.value.upId)
         }
@@ -163,6 +174,7 @@ onMounted(async()=>{
     // 假如传来了当前聊天对象
     if (route &&route.query && route.query.receiverId) { // NOTE 使用route.query?没用，需要显式检查
         // 如果不存在，则新建
+
     } 
 })
 </script>

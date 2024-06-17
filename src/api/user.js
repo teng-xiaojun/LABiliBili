@@ -36,7 +36,6 @@ export const fetchUserInfo = async(userId, upId) =>{
             userId1: userId,
             userId2: upId
         })
-        console.error(`接受的数据：${JSON.stringify(response)}`)
         // console.log(`看下用户信息：${JSON.stringify(response)}`)
         return ({
             "id": response.id,

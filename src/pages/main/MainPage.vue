@@ -1,11 +1,21 @@
 <template>
   <!--回到顶端的按钮-->
-  <div id="back-top-btn-id" class="back-top-btn detail-btn-chosen common-btn-center based-box" @click="scrollToTop()">返回顶部</div>
+  <div id="back-top-btn-id" class="back-top-btn detail-btn-chosen 
+  common-btn-center based-box" @click="scrollToTop()">返回顶部</div>
+  <div class="common-box">
+    <!--TODO：待删-->
+    <p>{{ logInfo }}</p>
+    <p>跳转至
+      <span @click="turnToBigModel()">大模型</span>
+    </p>
+  </div>
   <div class="main-page">
     <div class="first-level">
       <div class="recommendation">
-      <span class="recommendation-item" @click="turnToRank()"><div class="img-bg" style="background-color: #49a9f8;"><img src="@/assets/img/rank.svg" /></div><p>动 态</p></span>
-      <span class="recommendation-item" @click="turnToHot()"><div class="img-bg" style="background-color: rgb(205, 110, 252);"><img src="@/assets/img/fire.svg" /></div><p>热 门</p></span>
+      <span class="recommendation-item" @click="turnToRank()"><div class="img-bg" style="background-color: #49a9f8;">
+        <img src="@/assets/img/rank.svg" /></div><p>动 态</p></span>
+      <span class="recommendation-item" @click="turnToHot()"><div class="img-bg" style="background-color: rgb(205, 110, 252);">
+        <img src="@/assets/img/fire.svg" /></div><p>热 门</p></span>
       </div> 
       <SearchPanel class="search-box flex-based-container"/>
     </div>
@@ -36,17 +46,25 @@ import { ElMessage } from 'element-plus'
 let startLoc = 1 // 当前位置0
 let probableData = [] // 可能放入的新数据
 let scrollToTopButton = document.getElementById('back-top-btn-id')
+const logInfo = '前端跑路了，临时工上任。正在紧急修bug。2024.6.17'
 const isRemain = ref(true) // 是否仍然有新数据
 const debounce = new Debounce() // 防抖
 const userInfo = useUserInfo() // 保存登录信息
 const userId = userInfo.getId()
 const eachTimeVideos = 10 // 每次获取的视频数
-const downNew = ref(false) // 触底加载 
+const downNew = ref(false) // 触底加载
 // const isUpdating = ref(false) // 是否在处理触底加载
 const router = useRouter()
 const aLoadingVue = defineAsyncComponent(()=>
   import ("@/components/public/aLoading")
 )
+// 跳转至大模型
+const turnToBigModel = () => {
+  const routeURL = router.resolve({
+    path: `/message/MyChat/${userId}`,
+  })
+  window.open(routeURL.href, '_blank')
+}
 const scrollToTop = () => {
   window.scrollTo({
     top: 0,

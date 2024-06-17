@@ -461,3 +461,28 @@ figcaption {
         z-index: 999; 
     }
 }
+// 滑动按钮
+.user-content-slide-btn {
+    @extend .flex-center-container;
+    border-radius: 20px;
+    position: relative;
+    padding: 0 0.5rem;
+    .slider {
+        @extend .based-box;
+        @extend .flex-center-container;
+        cursor: pointer;
+        transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.2s ease-in-out;
+        will-change: transform, opacity;
+        margin: 0;
+        font-weight: 700;
+    }
+    .slider::before {
+        content: "";
+    }
+    span:first-child{
+        margin-right: 1.5rem;
+    }
+    span {
+        cursor: pointer;
+    }
+}
