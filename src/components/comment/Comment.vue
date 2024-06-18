@@ -4,7 +4,24 @@
         <div class="comment-info">
             <div v-if="getCommentType === 'top'">
                 <div class="flex-based-container">
-                    <!-- <img v-lazy="getCommentInfo.avatar" class="user-avatar first-common-avatar" /> -->
+                    <el-popover placement="top-start" :width="200" trigger="hover">
+                        <template #reference>
+                            <img :src="getCommentInfo.senderCoverUrl"
+                                style="width: 40px; height: 40px; border-radius: 50%; " />
+                        </template>
+                        <div class="pop-up">
+                            <div class="top">
+                                <img :src="getCommentInfo.senderCoverUrl"
+                                    style="width: 40px; height: 40px; border-radius: 50%; " />
+                                <div>{{ getCommentInfo.senderName }}</div>
+                            </div>
+                            <div class="footer">
+                                <el-button type="text" @click="handleFollow">关注</el-button>
+                                <el-button type="text" @click="handleMessage">私信</el-button>
+                            </div>
+
+                        </div>
+                    </el-popover>
                     <div class="info-item comment-username font-first-color">{{ getCommentInfo.senderName }}</div>
                     <div class="edit-function" v-if="isEdit">
                         <el-dropdown @command="handleEdit">
@@ -19,10 +36,28 @@
                         </el-dropdown>
                     </div>
                 </div>
-                <div class="info-item comment-content font-third-color">{{ getCommentInfo.content }}</div>
+                <div class="info-item comment-content font-third-color" style="margin-left: 50px;">{{
+                getCommentInfo.content }}</div>
             </div>
-            <div v-else class="flex-based-container">
-                <!-- <img v-lazy="getCommentInfo.avatar" class="user-avatar second-common-avatar" /> -->
+            <div v-else class="flex-based-container" style="height: 60px;">
+                <el-popover placement="top-start" :width="200" trigger="hover">
+                    <template #reference>
+                        <img :src="getCommentInfo.senderCoverUrl"
+                            style="width: 40px; height: 40px; border-radius: 50%; " />
+                    </template>
+                    <div class="pop-up">
+                        <div class="top">
+                            <img :src="getCommentInfo.senderCoverUrl"
+                                style="width: 40px; height: 40px; border-radius: 50%; " />
+                            <div>{{ getCommentInfo.senderName }}</div>
+                        </div>
+                        <div class="footer">
+                            <el-button type="text" @click="handleFollow">关注</el-button>
+                            <el-button type="text" @click="handleMessage">私信</el-button>
+                        </div>
+
+                    </div>
+                </el-popover>
                 <div class="info-item comment-username">
                     <span class="font-second-color">{{ getCommentInfo.senderName }}</span> 回复 <span
                         class="font-second-color">{{
@@ -47,10 +82,8 @@
             </div>
         </div>
         <!--如果回复评论-->
-
     </div>
 </template>
-
 <script setup>
 import { ref, defineProps, defineAsyncComponent } from 'vue'
 import { useUserInfo } from "@/store/userInfo"
@@ -131,6 +164,9 @@ const isShow = () => {
 
 }
 
+
+
+
 // 操作评论
 const handleEdit = (command) => {
     switch (command) {
@@ -139,6 +175,13 @@ const handleEdit = (command) => {
         case 'delete':
             break
     }
+}
+
+
+//私信
+const handleMessage = () => {
+    sessionStorage.setItem('commentInfo', JSON.stringify(getCommentInfo.value))
+    router.push({ path: `/message/MyChat/${props.userId}` })
 }
 </script>
 

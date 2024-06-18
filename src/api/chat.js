@@ -6,21 +6,22 @@ const chat = '/chat/'
 /**
  * 获取所有用户列表
  */
-export const fetchAllPeople = async(userId) => {
+export const fetchAllPeople = async (userId) => {
     try {
         const getURL = chat + `getHistoryChatSession/${userId}`
         const response = await request.get(getURL, {
             userId: userId
         })
-        return response.map((item)=>({
+        return response.map((item) => ({
             avatar: item.cover,
-			createTime: item.updateTime,
-			upName: item.nickname,
-			upId: item.userId,
+            createTime: item.updateTime,
+            upName: item.nickname,
+            upId: item.userId,
             leastMessage: item.updateContent,
             leastMessageFrom: 1, // 0是不存在，1是自己，2是对方
+            type: 0
         }))
-    }catch(e) {
+    } catch (e) {
         ElMessage.error(`获取所有用户列表错误：${e}`)
         console.error(`获取所有用户列表错误：${e}`)
     }
@@ -29,13 +30,13 @@ export const fetchAllPeople = async(userId) => {
 /**
  * 接入星火大模型
  */
-export const chatToXingHuo = async() => {
+export const chatToXingHuo = async () => {
     try {
         const getURL = ''
         const response = await request.get(getURL, {
 
         })
-    }catch(e) {
+    } catch (e) {
         ElMessage.error(`大模型：${e}`)
         console.error(`获取所有用户列表错误：${e}`)
     }
@@ -44,20 +45,20 @@ export const chatToXingHuo = async() => {
 /**
  * 获取当前用户和另一个人的历史聊天记录
  */
-export const fetchChatHistory = async(userSelf, userOther) => {
+export const fetchChatHistory = async (userSelf, userOther) => {
     try {
         const getURL = chat + `getHistoryChat/${userSelf}/${userOther}`
         const response = await request.get(getURL, {
             userId: userSelf,
             receiverId: userOther
         })
-        return response.map((item)=>({
+        return response.map((item) => ({
             id: item.id,
-			createTime: item.createTime,
+            createTime: item.createTime,
             content: item.content,
-			upId: item.senderId
+            upId: item.senderId
         })).reverse()
-    }catch(e) {
+    } catch (e) {
         ElMessage.error(`获得当前历史聊天失败：${e}`)
         console.error(`获得当前历史聊天失败：${e}`)
     }
@@ -66,25 +67,26 @@ export const fetchChatHistory = async(userSelf, userOther) => {
 /**
  * 发布回复
  */
-export const addReply = async(content, senderId, receiverId) => {
+export const addReply = async (content, senderId, receiverId, sessionId) => {
     try {
         const postURL = chat + `addHistoryChat`
         const response = request.post(postURL, {
             content: content,
             senderId: senderId,
-            receiverId: receiverId
+            receiverId: receiverId,
+            sessionId
         })
         return response
-    }catch(e) {
+    } catch (e) {
         ElMessage.error(`发布回复接口错误：${e}`)
         console.error(`发布回复接口错误：${e}`)
-    }   
+    }
 }
 
 /**
  * 修改会话的最后聊天时间
  */
-export const changeSessionTime = async(senderId, receiverId, content) => {
+export const changeSessionTime = async (senderId, receiverId, content) => {
     try {
         const postURL = chat + 'changeChatSessionTime'
         const response = await request.post(postURL, {
@@ -102,7 +104,7 @@ export const changeSessionTime = async(senderId, receiverId, content) => {
 /**
  * 修改聊天记录为已读
  */
-export const editChatToRead = async(senderId, receiverId) => {
+export const editChatToRead = async (senderId, receiverId) => {
     try {
         const postURL = chat + 'changeChatStatus'
         const response = await request.post(postURL, {
@@ -119,15 +121,15 @@ export const editChatToRead = async(senderId, receiverId) => {
 /**
  * 新建聊天
  */
-export const addNewChat = async(senderId, receiverId) => {
+export const addNewChat = async (senderId, receiverId, updateContent) => {
     try {
         console.log("nirenne ")
-        const postURL = chat + 'addChatSession'
+        const postURL = chat + 'addChatSessionAndContent'
         console.log("nirenne2")
         const response = await request.post(postURL, {
             receiverId: receiverId,
             senderId: senderId,
-            updateContent: ""
+            updateContent
         })
         return response
     } catch (e) {
@@ -137,12 +139,12 @@ export const addNewChat = async(senderId, receiverId) => {
 }
 
 
-export const getImage =  (url)=>{
+export const getImage = (url) => {
     console.log('333getImage');
-    return  request.get(url)
+    return request.get(url)
 }
 
 
-export const getPPT = (URL)=>{
+export const getPPT = (URL) => {
     return request.get(URL)
 }

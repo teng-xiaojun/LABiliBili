@@ -1,15 +1,15 @@
 <template>
     <div style="position: relative;overflow: visible;">
-        <img :src="firstAvatar" alt="头像" @mouseover="isUpIntro=true" @mouseout="isUpIntro=false"
-        class="first-common-avatar" @click="turnToOtherCenter(userId)"/>
-        <div v-if="isUpIntro" @mouseout="isUpIntro=false" class="profile-pop-up">
-            <div class="profile-pop-up-name font-first-color">{{infoData.name}}</div>
+        <img :src="firstAvatar" alt="头像" @mouseover="isUpIntro = true" @mouseout="isUpIntro = false"
+            class="first-common-avatar" @click="turnToOtherCenter(userId)" />
+        <div v-if="isUpIntro" @mouseout="isUpIntro = false" class="profile-pop-up">
+            <div class="profile-pop-up-name font-first-color">{{ infoData.name }}</div>
             <div class="follow-data">
-                <span style="vertical-align: -0.1rem;" @click="follow()">关注数{{infoData.followingNum}}</span>
-                <span>粉丝数{{infoData.fansNum}}</span>
+                <span style="vertical-align: -0.1rem;" @click="follow()">关注数{{ infoData.followingNum }}</span>
+                <span>粉丝数{{ infoData.fansNum }}</span>
             </div>
             <div class="profile-pop-up-intro">
-                <p>{{infoData.intro}}</p>
+                <p>{{ infoData.intro }}</p>
             </div>
             <div class="concern-group">
                 <button v-if="!infoData.isFocus" class="concern common-btn-1 main-first-color">关注</button>
@@ -48,13 +48,13 @@ const turnToOtherCenter = (userId) => {
         path: `/userCenter/myItem/${userId}`,
     })
     window.open(routeURL.href, '_blank')
-} 
+}
 // onMounted
-onMounted(()=>{
+onMounted(() => {
     // 获取信息数据
-    fetchUserInfo(1).then(res=>{
-        console.log(res)
-    })
+    // fetchUserInfo(1).then(res=>{
+    //     console.log(res)
+    // })
 })
 // 要放上去的数据
 const infoData = reactive({
@@ -72,28 +72,29 @@ const infoData = reactive({
 /**
  * 关注逻辑的实现
  */
-const follow = ()=>{
+const follow = () => {
     // 判断是否登录对象和
     infoData.isFocus = ~infoData.isFocus
-    if(infoData.isFocus){
+    if (infoData.isFocus) {
         // 取消关注
         // const res = removeFollowing()
         alert('关注成功')
-    }else{
+    } else {
         // 关注
         // const res = addFollowing()
         alert('关注成功')
-        
+
     }
 }
 
 </script>
 
 <style scoped>
-.profile-pop-up{
+.profile-pop-up {
     position: absolute;
-    top: 2.5rem; /* position: absolute定位 */
-    left: 3rem; 
+    top: 2.5rem;
+    /* position: absolute定位 */
+    left: 3rem;
     max-width: 20rem;
     height: 7.2rem;
     padding: 1rem;
@@ -102,41 +103,51 @@ const follow = ()=>{
     background: #fff;
     box-shadow: 0 2px 25px 0 #79b1eca9;
 }
-button{
+
+button {
     width: 3.5rem;
     height: 1.6rem;
     border-radius: 10px;
     border: none;
 }
-.profile-pop-up-name{
+
+.profile-pop-up-name {
     font-weight: 600;
 }
-.profile-pop-up-intro{
+
+.profile-pop-up-intro {
     margin-top: 0.5rem;
     height: 2.5rem;
     overflow: hidden;
 }
-.follow-data span:first-child{
+
+.follow-data span:first-child {
     margin-right: 1rem;
 }
-.concern-group{
+
+.concern-group {
     position: absolute;
     right: 1rem;
 }
-.concern-group button:first-child{
+
+.concern-group button:first-child {
     margin-right: 1rem;
 }
-.concern{
+
+.concern {
     font-size: 0.9rem;
     color: #fff;
 }
-.concern:hover{
+
+.concern:hover {
     background: #6ba2dca9;
 }
-.concern:active{
+
+.concern:active {
     background: #4e7caea9;
 }
-.not-concern{
+
+.not-concern {
     background: #fff;
     color: #79b1eca9;
     border: 1px solid #79b1eca9;

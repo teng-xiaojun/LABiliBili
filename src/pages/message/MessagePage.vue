@@ -2,8 +2,8 @@
 <template>
     <div class="message-panel">
         <!--左栏选择-->
-        <SidebarPanel style="margin-top: -1rem;"
-        class="message-sidebar" :id="1" :menuConfig="menuConfig" :isCollapseVal="isHalf"/>
+        <SidebarPanel style="margin-top: -1rem;" class="message-sidebar" :id="1" :menuConfig="menuConfig"
+            :isCollapseVal="isHalf" />
         <!--中间-->
         <message-content>
             <router-view v-slot="{ Component }">
@@ -18,7 +18,7 @@
 <script setup>
 import { onMounted, ref, watch, onBeforeUnmount } from 'vue'
 import { useRouter } from "vue-router"
-import { useUserInfo} from "@/store/userInfo"
+import { useUserInfo } from "@/store/userInfo"
 import SidebarPanel from '@/components/Sidebar'
 import Debounce from '@/static/debounce'
 const isHalf = ref(true) // 是否为半屏
@@ -32,21 +32,21 @@ const menuConfig = [{
     index: `/message/Reply/${id}`,
     title: "回复我的",
     permiss: true, // 本页面没有权限的配置
-},{
+}, {
     icon: "Help",
     index: `/message/At/${id}`,
     title: "@我的",
-    permiss: true, 
-},{
+    permiss: true,
+}, {
     icon: "Present",
     index: `/message/ThumbsUpMe/${id}`,
     title: "点赞我的",
-    permiss: true, 
-},{
+    permiss: true,
+}, {
     icon: "ChatDotRound",
     index: `/message/MyChat/${id}`,
     title: "我的聊天",
-    permiss: true, 
+    permiss: true,
 }]
 // },{
 //     icon: "ScaleToOriginal",
@@ -55,29 +55,29 @@ const menuConfig = [{
 //     permiss: true, 
 // },{
 const getHalf = (newValue) => {
-    if(parseInt(newValue)<720) {
+    if (parseInt(newValue) < 720) {
         isHalf.value = true
     } else {
         isHalf.value = false
     }
 }
 // 判断当前是否为半屏
-watch(width, async(newValue, oldValue)=>{
+watch(width, async (newValue, oldValue) => {
     getHalf(newValue)
     await debounce.debounceEnd(100)
-    window.addEventListener("updateWhenNewSize", debounce) 
+    window.addEventListener("updateWhenNewSize", debounce)
 })
 // 监听是否是半屏
 window.onresize = () => {
-    return (()=>{
+    return (() => {
         width.value = document.documentElement.clientWidth
     })()
 }
 getHalf(document.documentElement.clientWidth)
-onBeforeUnmount(()=>{
-    window.removeEventListener("updateWhenNewSize", debounce) 
+onBeforeUnmount(() => {
+    window.removeEventListener("updateWhenNewSize", debounce)
 })
-onMounted(()=>{
+onMounted(() => {
     router
 })
 </script>
@@ -88,22 +88,25 @@ onMounted(()=>{
     display: flex;
     max-height: 100%;
 }
+
 .message-sidebar {
     max-width: 12rem !important;
     width: auto;
 }
-message-content{
+
+message-content {
     box-shadow: -0.3rem -0.2rem 25px 1px rgb(169, 157, 244);
     // position: absolute;
     /* background-color: #3c7561; */
     border-radius: 20px;
     margin: 2rem 2rem 2rem 2rem;
-    width: auto; 
+    width: auto;
     height: calc(80vh);
     flex: 1;
 }
-@media screen and (min-width: 1020px){
-    message-content{
+
+@media screen and (min-width: 1020px) {
+    message-content {
         width: calc(85vw);
     }
 }
