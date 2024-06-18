@@ -2,59 +2,65 @@
 <template>
     <div class="comment-wrap flex-based-container">
         <div class="comment-info">
-            <div v-if="getCommentType==='top'">
+            <div v-if="getCommentType === 'top'">
                 <div class="flex-based-container">
                     <!-- <img v-lazy="getCommentInfo.avatar" class="user-avatar first-common-avatar" /> -->
-                    <div class="info-item comment-username font-first-color">{{getCommentInfo.senderName}}</div>
+                    <div class="info-item comment-username font-first-color">{{ getCommentInfo.senderName }}</div>
                     <div class="edit-function" v-if="isEdit">
                         <el-dropdown @command="handleEdit">
-                            <img src="@/assets/img/utils/more.svg" style="width: 0.8rem; margin-left: 0.2rem; margin-top: 0.15rem;" />
+                            <img src="@/assets/img/utils/more.svg"
+                                style="width: 0.8rem; margin-left: 0.2rem; margin-top: 0.15rem;" />
                             <template #dropdown>
-                            <el-dropdown-menu>
-                                <el-dropdown-item command="edit">编辑</el-dropdown-item>
-                                <el-dropdown-item command="delete">删除</el-dropdown-item>
-                            </el-dropdown-menu>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item command="edit">编辑</el-dropdown-item>
+                                    <el-dropdown-item command="delete">删除</el-dropdown-item>
+                                </el-dropdown-menu>
                             </template>
                         </el-dropdown>
                     </div>
                 </div>
-                <div class="info-item comment-content font-third-color">{{getCommentInfo.content}}</div>
+                <div class="info-item comment-content font-third-color">{{ getCommentInfo.content }}</div>
             </div>
             <div v-else class="flex-based-container">
                 <!-- <img v-lazy="getCommentInfo.avatar" class="user-avatar second-common-avatar" /> -->
-                <div class="info-item comment-username" >
-                    <span class="font-second-color">{{getCommentInfo.senderName}}</span> 回复 <span class="font-second-color">{{getCommentInfo.receiverName}}</span> </div>
-                <div class="info-item comment-content reply-content font-fifth-color">{{getCommentInfo.content}}</div>
+                <div class="info-item comment-username">
+                    <span class="font-second-color">{{ getCommentInfo.senderName }}</span> 回复 <span
+                        class="font-second-color">{{
+                getCommentInfo.receiverName }}</span>
+                </div>
+                <div class="info-item comment-content reply-content font-fifth-color">{{ getCommentInfo.content }}</div>
             </div>
             <div class="info-item comment-others flex-based-container">
-                <div>{{getCommentInfo.createtime}}</div>
+                <div>{{ getCommentInfo.createtime }}</div>
                 <div class="thumbs-up common-based-btn flex-based-container" @click="changeThumbsUpStatus()">
-                    <img v-if="!commentInfo.isLike" alt="未点赞" src="@/assets/img/comment/no_thumbsUp.svg" style="width: 1rem;" />
+                    <img v-if="!commentInfo.isLike" alt="未点赞" src="@/assets/img/comment/no_thumbsUp.svg"
+                        style="width: 1rem;" />
                     <img v-else src="@/assets/img/comment/yes_thumbsUp.svg" alt="已点赞" style="width: 1rem;" />
-                    <p>{{commentInfo.likeCount}}</p>
+                    <p>{{ commentInfo.likeCount }}</p>
                 </div>
-                <div class="reply-btn change-color-btn"   @click="changeReplyStatus()">
-                    回复 
+                <div class="reply-btn change-color-btn" @click="changeReplyStatus()">
+                    回复
                 </div>
             </div>
-            <div v-if="isReply" >
-            <replyVue :value="sendUser" @isShow="isShow" />
+            <div v-if="isReply">
+                <replyVue :value="sendUser" @isShow="isShow" />
             </div>
         </div>
         <!--如果回复评论-->
-      
+
     </div>
 </template>
 
 <script setup>
 import { ref, defineProps, defineAsyncComponent } from 'vue'
-import { useUserInfo} from "@/store/userInfo"
+import { useUserInfo } from "@/store/userInfo"
 import { addLike, deleteLike } from '@/api/like_and_collect'
 import { ElMessage } from 'element-plus'
+import { useRouter, useRoute } from 'vue-router'
 const userInfo = useUserInfo() // 使用登录信息
 const isEdit = ref(false) // 是否能修改评论
-const replyVue = defineAsyncComponent(()=>
-    import ("@/components/comment/Reply")
+const replyVue = defineAsyncComponent(() =>
+    import("@/components/comment/Reply")
 )
 const props = defineProps({
     videoId: {
@@ -69,15 +75,15 @@ const props = defineProps({
         type: String,
         required: true
     },
-    userId:{
-        type:Number,
-        default:0,
+    userId: {
+        type: Number,
+        default: 0,
     },
-    topId:{
-        typeof:Number
+    topId: {
+        typeof: Number
     },
-    parentId:{
-        typeof:Number
+    parentId: {
+        typeof: Number
     }
 })
 const emits = defineEmits('getData')
@@ -94,23 +100,29 @@ const sendUser = {
     avatar: require("@/assets/img/avater.png")
 }
 // 切换点赞状态
-const changeThumbsUpStatus = async() =>{
+const changeThumbsUpStatus = async () => {
     getCommentInfo.value.isLike = !getCommentInfo.value.isLike // 更改目前的前端状态
     // 调用后端接口
-    if(getCommentInfo.value.isLike){
-        if(!await addLike(userInfo.getId(), getVideoId, '评论')){ // 测试
+    if (getCommentInfo.value.isLike) {
+        if (!await addLike(userInfo.getId(), getVideoId, '评论')) { // 测试
             ElMessage.error('评论点赞失败')
             getCommentInfo.value.isLike = false
         }
-    }else{
-        if(!await deleteLike(userInfo.getId(), getVideoId, '评论')){
+    } else {
+        if (!await deleteLike(userInfo.getId(), getVideoId, '评论')) {
             ElMessage.error('取消点赞失败')
             getCommentInfo.value.isLike = true
         }
     }
 }
+const router = useRouter()
+const route = useRoute()
 // 切换评论状态
 const changeReplyStatus = () => {
+    if (props.userId === 0) {
+        localStorage.setItem('path', route.fullPath)
+        return router.push({ path: '/login' })
+    }
     isReply.value = !isReply.value
 }
 const isShow = () => {
@@ -121,7 +133,7 @@ const isShow = () => {
 
 // 操作评论
 const handleEdit = (command) => {
-    switch(command) {
+    switch (command) {
         case 'edit':
             break
         case 'delete':
@@ -135,53 +147,64 @@ const handleEdit = (command) => {
     width: 100%;
     height: 100%;
 }
+
 .user-avatar {
     margin-left: 0.5rem;
 }
-.comment-info{
+
+.comment-info {
     width: 100%;
     height: 90%;
     position: relative;
     text-align: left;
 }
-.info-item{
+
+.info-item {
     position: static;
     margin-left: 1rem;
 }
-.comment-username{
+
+.comment-username {
     font-weight: 600;
 }
-.comment-content{
+
+.comment-content {
     height: auto;
     max-height: 8rem;
     margin-bottom: 0.5rem;
 }
-.reply-content{
+
+.reply-content {
     margin-top: 0.55rem;
     font-size: 0.95rem;
 }
-.comment-others{
+
+.comment-others {
     bottom: 0.3rem;
     font-size: 0.8rem;
-    .thumbs-up{
+
+    .thumbs-up {
         margin-left: 1rem;
     }
-    .reply-btn{
+
+    .reply-btn {
         margin-left: 2rem;
     }
 }
+
 .edit-function {
     border-radius: 50%;
     width: 1.2rem;
     height: 1.2rem;
-    background:  #fff;
+    background: #fff;
     border: 2px solid #79b1ec6e;
     box-shadow: 0.2rem 0.2rem 20px 1px #79b1ec6e;
-    position: absolute; 
+    position: absolute;
     right: 0.5rem;
     cursor: pointer;
 }
-.my-reply{
+
+.my-reply {
     width: 20rem;
     height: 10rem;
     background-color: #1f73a7;
