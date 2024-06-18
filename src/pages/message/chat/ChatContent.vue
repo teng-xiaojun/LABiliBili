@@ -219,7 +219,6 @@ const submitReply = async() => {
                     receiverId: parseInt(currentPerson.value.upId).toString() // 发送的对象
                 }
             }
-            console.error(`message: ${JSON.stringify(message)}`)
             socket.send(JSON.stringify(message)) // 将消息对象转换为JSON字符串并发送
             const replyRes = true
             if(currentPerson.value.upId!==0)
