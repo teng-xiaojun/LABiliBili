@@ -4,7 +4,7 @@
     @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
         <!--左右型-->
         <div class="hover-target flex-column-left-max-container">
-            <p class="hover-main-title">{{data.name}}</p><!--标题-->
+            <p class="hover-main-title">{{data.collectGroupName}}</p><!--标题-->
             <p class="hover-sub-title">创建：{{data.createTime}}</p><!--数据-->
         </div><!--TODO：增加数量限制-->
         <div v-if="showEdit" class="edit-wrap flex-center-container">
@@ -21,7 +21,7 @@ const showEdit = ref(false) // 是否展示编辑
 let timer = null;
 
 const emits = defineEmits(['update:editData',
- 'update:deleteData', 'update:addToData'])
+ 'update:deleteData', 'update:addToData','updataEdit'])
 // 获取信息
 const props = defineProps({
     data: {
@@ -54,11 +54,12 @@ const handleMouseLeave = () => {
 
 const editAction = () => {
     // 修改
-    data.value
+    emits('updataEdit',data.value)
 }
 
 const deleteAction = () => {
     // 发出api后再删除
+    emits('deleteData',data.value)
     
 }
 </script>

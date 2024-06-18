@@ -5,12 +5,12 @@
  *  2. likeToComment
  *  3. likeToTrend
  *  4. 
- *  */ 
+ *  */
 
 import { ElMessage } from "element-plus"
 import request from "./index.js"
 const basic_like = '/like/'
-const basic_unLike = '/unlike/'
+const basic_unLike = '/like/'
 const basic_collect = '/collect/'
 
 /**
@@ -23,45 +23,46 @@ const basic_collect = '/collect/'
  *  @param {string} objectType 被点赞的对象类型 
  * 返回字段：
  *  @return {boolean} is
- *  */ 
+ *  */
 // 对视频点赞 
-export const addLike = async(userId, commentId, videoId, objectType) =>{ 
-    try{
+export const addLike = async (userId, objId, objectType) => {
+    try {
         let postURL = basic_like
         let response = null
         postURL += 'like'
-        switch(objectType){
+        switch (objectType) {
             case 'video': {
+                console.log(33);
                 response = await request.post(postURL, {
-                  videoId: videoId,
-                  userId: userId,
+                    videoId: objId,
+                    userId: userId,
                 })
                 break
             }
             case 'comment': {
                 response = await request.post(postURL, {
-                    videoId: videoId,
+                    // videoId: objId,
                     userId: userId,
-                    commentId: commentId
+                    commentId: objId
                 })
                 break
             }
         }
         return response
-    }catch(e){
+    } catch (e) {
         console.error(`点赞${objectType}失败：`, e);
     }
 }
 /**
  * 取消点赞
  */
-export const deleteLike = async(userId, objId, objectType) => {
-    try{
+export const deleteLike = async (userId, objId, objectType) => {
+    try {
         let postURL = basic_unLike
         let unLikeParams = {}
-        switch(objectType){
+        switch (objectType) {
             case 'video': {
-                postURL += 'unLikeToVideo'
+                postURL += 'reCallLike'
                 unLikeParams = {
                     videoId: objId,
                     userId: userId,
@@ -69,7 +70,7 @@ export const deleteLike = async(userId, objId, objectType) => {
                 break;
             }
             case 'comment': {
-                postURL += 'unLikeToComment'
+                postURL += 'reCallLike'
                 unLikeParams = {
                     commentId: objId,
                     userId: userId,
@@ -79,7 +80,7 @@ export const deleteLike = async(userId, objId, objectType) => {
         }
         const response = await request.post(postURL, unLikeParams)
         return response
-    }catch(e){
+    } catch (e) {
         console.error(`取消点赞${objectType}失败：`, e);
     }
 }
@@ -91,8 +92,8 @@ export const deleteLike = async(userId, objId, objectType) => {
  *  @param {number} 请求的对象用户id
  * 返回字段：
  *  @return {boolean} 
- *  */ 
-export const fetchCollection = async(userId) =>{ 
+ *  */
+export const fetchCollection = async (userId, videoId) => {
     try {
         const getURL = `/collect/getCollectGroup/${userId}`
         const response = await request.get(getURL, {
@@ -104,7 +105,7 @@ export const fetchCollection = async(userId) =>{
             userId: userId,
             createTime: folder.createTime
         }))
-    }catch(e) {
+    } catch (e) {
         ElMessage.error("获取收藏夹失败", e)
         console.error("获取收藏夹失败", e)
     }
@@ -113,7 +114,7 @@ export const fetchCollection = async(userId) =>{
 /**
  * 查看收藏夹中的视频
  */
-export const fetchVideoInCollect = async(userId) => {
+export const fetchVideoInCollect = async (userId) => {
     try {
         let postURL = basic_collect + `getCollectVideo/${userId}`
         const response = await request.get(postURL, {
@@ -135,10 +136,10 @@ export const fetchVideoInCollect = async(userId) => {
  * 返回字段：
  *  @return {boolean} name 
  */
-export const editVideoToCollect = async(collectionId, videoId, type) => {
+export const editVideoToCollect = async (collectionId, videoId, type) => {
     try {
         let postURL = basic_collect
-        if(type===0) {
+        if (type === 0) {
             postURL = basic_collect + 'collect' // 收藏
         } else {
             postURL = basic_collect + 'recallCollect' // 取消收藏
@@ -148,8 +149,8 @@ export const editVideoToCollect = async(collectionId, videoId, type) => {
             videoId: videoId
         })
         return response
-    }catch(e){
-        if(type===0) {
+    } catch (e) {
+        if (type === 0) {
             ElMessage.error(`将视频加入收藏夹（id：${collectionId}）失败：${e}`)
             console.error(`将视频加入收藏夹（id：${collectionId}）失败：${e}`)
         } else {
@@ -162,11 +163,11 @@ export const editVideoToCollect = async(collectionId, videoId, type) => {
 /**
  * 创建，修改收藏夹
  */
-export const addCollection = async(collectionName, userId, collectionId) => {
+export const addCollection = async (collectionName, userId, collectionId) => {
     try {
         const postURL = basic_collect + 'editCollectGroup'
         const response = await request.post(postURL, {
-            ...(collectionId && { id: collectionId }),   
+            ...(collectionId && { id: collectionId }),
             name: collectionName,
             userId: userId
         })
@@ -180,17 +181,30 @@ export const addCollection = async(collectionName, userId, collectionId) => {
 /**
  * 删除收藏夹
  */
-export const deleteCollections = async(collectionId, collectionName, userId) => {
+export const deleteCollections = async (collectionId) => {
     try {
         const postURL = basic_collect + 'deleteCollectGroup'
-        const response = await request.post(postURL, {  
+        const response = await request.post(postURL, {
             id: collectionId,
-            name: collectionName,
-            userId: userId
+            // name: collectionName,
+            // userId: userId
         })
         return response
-    }catch(e) {
+    } catch (e) {
         ElMessage.error("删除收藏夹失败", e)
         console.error("删除收藏夹失败", e)
     }
+}
+
+
+//获取收藏夹
+export const getCollections = async (videoId, UserId) => {
+    let res = await request.get(`/collect/getVideoToCollectGroup/${UserId}/${videoId}`)
+    return res
+}
+
+//修改收藏夹
+export const updateCollections = async (arr) => {
+    let res = await request.post('/collect/collect', arr);
+    return res
 }

@@ -1,19 +1,19 @@
 <!--创建新文件夹（收藏夹和视频合集）的弹窗-->
 <template>
     <div class="new-collection-panel">
-        <p class="new-collection-title">新建文件夹</p>
+        <p class="new-collection-title">{{title}}</p>
         <div class="flex-column-left-max-container">
             <div class="flex-left-container">
                 <p class="new-collection-name">收藏夹名称</p>
-                <aInput class="new-collection-input" 
+                <!-- <aInput class="new-collection-input" 
                 v-model:inputData="collectCreateData.name" 
                 @update:inputValue="handleCollectTitleUpdate"
-                :definedPlaceholder="'请输入收藏夹名称'" />
+                :definedPlaceholder="'请输入收藏夹名称'" /> -->
+                <el-input placeholder="请输入收藏夹名称" v-model="collectCreateData.name"></el-input>
             </div>
             <div class="flex-left-container">
                 <p class="new-collection-name">简介</p>
-                <aTextarea class="new-collection-textarea"
-                :maxLen="100"  />
+                <el-input type="textarea" v-model="collectCreateData.profile"></el-input>
             </div>
         </div>
         <el-button class="new-collection-btn 
@@ -37,19 +37,53 @@ const collectCreateData = ref({
     userId: userId,
     profile: "" // 不会用到收藏夹简介
 })
+const title = ref('新建文件夹')
+let emit =  defineEmits(['getData'])
 // 收藏夹创建
 const collectCreateProcess = async() => {
-    const res = await addCollection(collectCreateData.value.name, userId)
+    if(!collectCreateData.value.name){ 
+        return ElMessage({
+            message: "请输入收藏夹名称",
+            type: "warning"
+        
+        })
+    }
+    const res = await addCollection(collectCreateData.value.name, userId,collectCreateData.value.id)
     if(res) {
-        ElMessage.success(`收藏夹创建成功！`)
+        ElMessage.success( collectCreateData.value.id ? '收藏夹修改成功' : `收藏夹创建成功！`)
         // 返回到收藏夹创建
-        updateCollectionVal.updateCollection(false)
+        // updateCollectionVal.updateCollection(false)
+        emit('getData')
+        
     }
 }
 // 收藏夹名称
 const handleCollectTitleUpdate = (newValue) => {
     collectCreateData.value.name = newValue
 }
+
+const handleEdit = (row)=>{
+    title.value = '编辑文件夹'
+    // collectCreateData.value = Object.assign(collectCreateData.value,row)
+    collectCreateData.value.id = row.collectGroupId;
+    collectCreateData.value.name = row.collectGroupName;
+}
+const clearData = ()=>{
+    delete collectCreateData.value.id;
+    title.value = '新建文件夹'
+   let keys =  Object.keys(collectCreateData.value);
+   keys.forEach((item)=>{
+    collectCreateData.value[item]= ''
+   })
+}
+
+defineExpose({
+    handleEdit,
+    clearData
+})
+
+
+
 onMounted(()=>{
     
 })

@@ -21,10 +21,11 @@ const basic_video_up = basic_video + '/'
  * 返回字段
  * @return 如下
  */
-export const getVideoBig = async(startLoc) =>{
-    try{
-        const response = await request.get(basic_video_get+'getFirstPageVideo/'+startLoc)
-        return response.map((videoInMain)=>({
+export const getVideoBig = async (startLoc) => {
+    try {
+        const response = await request.get(basic_video_get + 'getFirstPageVideo/' + startLoc)
+
+        return response.map((videoInMain) => ({
             id: videoInMain.videoId, // int
             imgUrl: videoInMain.cover, // string
             authorId: videoInMain.authorId, // int
@@ -36,7 +37,7 @@ export const getVideoBig = async(startLoc) =>{
             videoName: videoInMain.name, // string
             url: videoInMain.url, // string - 视频存储在minio中的访问路径
         }))
-    }catch(e){
+    } catch (e) {
         ElMessage.error(`首页视频读取失败${e}`)
         console.error(`首页视频读取失败${e}`)
     }
@@ -54,14 +55,14 @@ export const getVideoBig = async(startLoc) =>{
  */
 export const getVideoSmall = async (location, userId, folderId) => {
     let getURL = basic_video_get
-    if(location==='trend'){
+    if (location === 'trend') {
         getURL = `/notice/getNotice/getDynamicVideo/${userId}`
-        const response = await request.get(getURL, {userId:userId})
+        const response = await request.get(getURL, { userId: userId })
         // 如果数据为空
-        if(response.length===0){
+        if (response.length === 0) {
             return []
         }
-        return response.map((item)=>({
+        return response.map((item) => ({
             id: item.id, // int
             upName: item.authorName, // string
             upId: item.authorId,
@@ -73,28 +74,28 @@ export const getVideoSmall = async (location, userId, folderId) => {
             createTime: item.createTime,
             status: item.status
         }))
-    }else if(location==='collect'){
-        getURL = '/collect/getCollectVideo/'+ userId
-        const response = await request.get(getURL, {userId:userId, folderId:folderId})
+    } else if (location === 'collect') {
+        getURL = '/collect/getCollectVideo/' + userId
+        const response = await request.get(getURL, { userId: userId, folderId: folderId })
         // 如果数据为空
-        if(response.length===0){
+        if (response.length === 0) {
             return []
         }
-        return response.map((item)=>({
+        return response.map((item) => ({
             id: item.videoId,
             title: item.title,
             imgUrl: item.videoCoverUrl,
             upName: item.authorName,
             createTime: item.createTime
         }))
-    }else{
-        getURL += 'getHistoryVideo/'+ userId
-        const response = await request.get(getURL, {userId:userId})
+    } else {
+        getURL += 'getHistoryVideo/' + userId
+        const response = await request.get(getURL, { userId: userId })
         // 如果数据为空
-        if(response.length===0){
+        if (response.length === 0) {
             return []
         }
-        return response.map((item)=>({
+        return response.map((item) => ({
             videoId: item.videoId,
             title: item.videoName,
             imgUrl: item.videoCover,
@@ -110,7 +111,7 @@ export const getVideoSmall = async (location, userId, folderId) => {
 /**
  * 读取视频详情页的视频
  */
-export const getVideoDetail = async(videoId, userId, collectGroupId) =>{
+export const getVideoDetail = async (videoId, userId, collectGroupId) => {
     try {
         const getUrl = basic_video_get + `getDetailVideo/${videoId}/${userId}/${collectGroupId}`
         const response = await request.get(getUrl, {
@@ -119,7 +120,7 @@ export const getVideoDetail = async(videoId, userId, collectGroupId) =>{
             collectGroupId: collectGroupId // 收藏夹列表："1,2,3"
         })
         // 如果数据为空，则前端使用测试数据
-        if(response.length===0){
+        if (response.length === 0) {
             return []
         }
         return {
@@ -137,7 +138,7 @@ export const getVideoDetail = async(videoId, userId, collectGroupId) =>{
             isLiked: response.isLiked, // boolean
             isCollected: response.isCollected // boolean
         }
-    }catch(e){
+    } catch (e) {
         ElMessage.error("视频详情页获取失败")
         console.error("视频详情页获取失败", e)
     }
@@ -146,11 +147,11 @@ export const getVideoDetail = async(videoId, userId, collectGroupId) =>{
 /**
  * 读取推荐视频列表
  */
-export const getRecommendVideos = async(videoId) => {
+export const getRecommendVideos = async (videoId) => {
     try {
         const getUrl = basic_video_get + 'getCommendVideo/' + videoId
-        const response = await request.get(getUrl, {videoId: videoId})
-        return response.map((item)=>({
+        const response = await request.get(getUrl, { videoId: videoId })
+        return response.map((item) => ({
             id: item.video_id, // int
             videoName: item.video_name, // string
             authorName: item.author_name, // string
@@ -170,14 +171,14 @@ export const getRecommendVideos = async(videoId) => {
 /**
  * 将视频归为历史视频
  */
-export const addVideoHistory = async(videoId, userId) => {
+export const addVideoHistory = async (videoId, userId) => {
     try {
-       const postURL = basic_video_get + `addPlayRecord/${videoId}/${userId}`
-       const response = await request.post(postURL, {
-        userId: userId,
-        videoId: videoId 
-       })
-       return response
+        const postURL = basic_video_get + `addPlayRecord/${videoId}/${userId}`
+        const response = await request.post(postURL, {
+            userId: userId,
+            videoId: videoId
+        })
+        return response
     } catch (e) {
         ElMessage.error("添加历史视频失败")
         console.error("添加历史视频失败：", e)
@@ -187,18 +188,18 @@ export const addVideoHistory = async(videoId, userId) => {
 /**
  * 删除单条历史视频的记录
  */
-export const deleteVideoHistory = async(videoId, userId) => {
+export const deleteVideoHistory = async (videoId, userId) => {
     try {
         const postURL = basic_video_get + `deleteHistoryVideo`
         const response = await request.post(postURL, {
-         userId: userId,
-         videoId: videoId 
+            userId: userId,
+            videoId: videoId
         })
         return response
-     } catch (e) {
+    } catch (e) {
         ElMessage.error("删除历史视频失败")
         console.error("删除历史视频失败：", e)
-     }
+    }
 }
 
 /**
@@ -209,14 +210,14 @@ export const deleteVideoHistory = async(videoId, userId) => {
  * 返回字段：@/pages/user/UserCenter
  *  @return {string} name 
  *  @return {[]}
- *  */ 
+ *  */
 export const fetchUpVideo = async (userId) => {
     try {
         const getURL = `selfCenter/getPersonalVideo/${userId}`
         const response = await request.get(getURL, {
             userId: userId
         })
-        return response.map((video)=>({
+        return response.map((video) => ({
             id: video.videoId,
             imgUrl: video.cover,
             length: video.length,
@@ -235,12 +236,12 @@ export const fetchUpVideo = async (userId) => {
  * 查看最近点赞的视频
  */
 export const fetchRecentLikeVideo = async (userId) => {
-    try{
+    try {
         const getURL = '/user-center/selfCenter/getRemotelyLikeVideo/' + userId
         const response = await request.get(getURL, {
             userId: userId
         })
-        return response.map((video)=>({
+        return response.map((video) => ({
             id: video.videoId,
             imgUrl: video.cover,
             danmukuCount: video.danmakuCount,
@@ -249,7 +250,7 @@ export const fetchRecentLikeVideo = async (userId) => {
             playCount: video.playCount,
             createTime: video.createTime
         }))
-    }catch(e){
+    } catch (e) {
         ElMessage.error("查看最近点赞视频失败：", e)
         console.error("查看最近点赞视频失败：", e)
     }
@@ -264,7 +265,7 @@ export const fetchRecentLikeVideo = async (userId) => {
  *  @return {string} name 
  *  @return {[]}
  */
-export const addUpVideo = async(file, intro, name, userId, cover) => {
+export const addUpVideo = async (file, intro, name, userId, cover) => {
     try {
         const formData = new FormData()
         console.log('获取到了什么video', file, cover)
@@ -274,17 +275,17 @@ export const addUpVideo = async(file, intro, name, userId, cover) => {
         formData.append('name', name)
         formData.append('userId', userId)
         formData.append('videoCover', cover)
-        console.log('传递过程中的formData',formData)
+        console.log('传递过程中的formData', formData)
         const postURL = 'createCenter/upload'
         const response = await request.post(postURL, formData
-        , {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'X-Requested-With': 'XMLHttpRequest',
-                'authorization': 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMTEiLCJyb2xlIjoidXNlciJ9.ybuiJ87Nq7xgcWrM50P_VgAF1P74fnEN8jCSH5daqR2re4hVTMYgkzMHWZlK104guM75RGWgVxNrtfnhinjR-g',
-                'laBiliBiliHeader': 'test_method_1'
-            }
-        })
+            , {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'authorization': 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMTEiLCJyb2xlIjoidXNlciJ9.ybuiJ87Nq7xgcWrM50P_VgAF1P74fnEN8jCSH5daqR2re4hVTMYgkzMHWZlK104guM75RGWgVxNrtfnhinjR-g',
+                    'laBiliBiliHeader': 'test_method_1'
+                }
+            })
         return response
     } catch (e) {
         ElMessage.error("上传视频失败")
@@ -295,14 +296,16 @@ export const addUpVideo = async(file, intro, name, userId, cover) => {
 /**
  * 获取视频的前三帧
  */
-export const getThreeVideoCovers = async(file) => {
+export const getThreeVideoCovers = async (file) => {
     try {
         const getURL = basic_video_up + 'getVideoCover'
         const response = await request.post(getURL, {
             file: file
-        }, { headers:{
-            'Content-Type': 'application/multipart/form-data'
-        }})
+        }, {
+            headers: {
+                'Content-Type': 'application/multipart/form-data'
+            }
+        })
         return response
     } catch (e) {
         ElMessage.error(`返回视频前三帧失败：${e}`)
@@ -319,11 +322,11 @@ export const getThreeVideoCovers = async(file) => {
  *  @return {string} name 
  *  @return {[]}
  */
-export const editUpVideo = async() => {
+export const editUpVideo = async () => {
     try {
         const postURL = ``
         const response = await request.post(postURL, {
-            
+
         })
         return response
     } catch (e) {
@@ -335,7 +338,7 @@ export const editUpVideo = async() => {
 /**
  * 新建和修改视频合集
  */
-export const addAndEditVideoCompilations = async(id, intro, name, userId) => {
+export const addAndEditVideoCompilations = async (id, intro, name, userId) => {
     try {
         const postURL = `/user-center/ensemble/addOrUpDaterEnsemble`
         const response = await request.post(postURL, {
@@ -354,7 +357,7 @@ export const addAndEditVideoCompilations = async(id, intro, name, userId) => {
 /**
  * 获取视频合集
  */
-export const fetchVideoCompilations = async(userId) => {
+export const fetchVideoCompilations = async (userId) => {
     try {
         const postURL = `/user-center/ensemble/getEnsembleList/${userId}`
         const response = await request.post(postURL, {
@@ -370,7 +373,7 @@ export const fetchVideoCompilations = async(userId) => {
 /**
  * 删除视频合集
  */
-export const deleteCompilations = async() => {
+export const deleteCompilations = async () => {
     try {
         const postURL = ``
         const response = await request.post(postURL, {
@@ -386,15 +389,15 @@ export const deleteCompilations = async() => {
 /**
  * 获取视频合集中视频
  */
-export const fetchVideosFromCompilations = async(userId, videoId) => {
-    try{
+export const fetchVideosFromCompilations = async (userId, videoId) => {
+    try {
         const getURL = `/user-center/ensemble/getAllVideoInEnsemble/${userId}/${videoId}`
         const response = await request.get(getURL, {
             userId: userId,
             videoId: videoId
         })
         return response // 没数据时会返回null
-    }catch(e){
+    } catch (e) {
         ElMessage.error(`查看视频合集中的视频失败：${e}`)
         console.error(`查看视频合集中的视频失败：${e}`)
     }
@@ -403,7 +406,7 @@ export const fetchVideosFromCompilations = async(userId, videoId) => {
 /**
  * 将视频移入合集
  */
-export const addVideoToCompilation = async() => {
+export const addVideoToCompilation = async () => {
     try {
         const postURL = ``
         const response = await request.post(postURL, {
@@ -419,7 +422,7 @@ export const addVideoToCompilation = async() => {
 /**
  * 将视频移出合集
  */
-export const removeVideoFromCompilation = async() => {
+export const removeVideoFromCompilation = async () => {
     try {
         const postURL = ``
         const response = await request.post(postURL, {

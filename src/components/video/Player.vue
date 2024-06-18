@@ -83,7 +83,8 @@ onMounted(()=>{
 })
 onBeforeUnmount(()=>{
     if(dp && dp.value !== null){
-        dp.destroy()
+      
+        dp.value.destroy()
     }  
 })
 </script>

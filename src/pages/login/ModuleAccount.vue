@@ -145,11 +145,12 @@ const submitForm = async()=> {
 	console.log(`这里怎么处理的${username_}, ${password_}`)
 	const loginRes = await verifyLogin(username_, password_, _captcha_)
 	// 如果传递了注册信息
-
     if(!setUser(loginRes)){
 		updateCaptcha()
 	} else {
-		router.push('/') // 跳转到首页
+		let path = localStorage.getItem('path') || '/'
+		router.push({path:path}) // 跳转到首页
+		localStorage.removeItem('path')
 	}
 }
 const rules = {

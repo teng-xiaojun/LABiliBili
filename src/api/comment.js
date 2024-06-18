@@ -5,22 +5,22 @@ import request from './index.js'
 * 获取所有评论
 * @param
 */
-export const fetchAllComments = async(videoId, userId) => {
+export const fetchAllComments = async (videoId, userId) => {
     const topComments = 0
     const childrenComments = 1
     let num_comments = 0 // 所有评论数
     let total_comments = [] // 所有评论
     let getUrl = `/comment/getComment/${videoId}/${userId}/`
     // 顶层评论
-    try{
-        const response = await request.get(getUrl+topComments,{
+    try {
+        const response = await request.get(getUrl + topComments, {
             videoId: videoId,
             userId: userId,
             type: 0
         })
         console.log(`看下response:${JSON.stringify(response)}`)
         num_comments = response.commentCount
-        response.commentResponseList.forEach((item)=>total_comments.push({
+        response.commentResponseList.forEach((item) => total_comments.push({
             id: item.id,
             senderId: item.senderId,
             senderName: item.senderName,
@@ -35,29 +35,29 @@ export const fetchAllComments = async(videoId, userId) => {
             replyLen: 0,
             replyIdList: []
         }))
-    } catch(e) {
+    } catch (e) {
         ElMessage.error(`获取所有顶层评论错误：${e}`)
         console.error("获取所有顶层评论错误:", e)
     }
     // 次级评论
     try {
-        const response = await request.get(getUrl+childrenComments, {
+        const response = await request.get(getUrl + childrenComments, {
             videoId: videoId,
             userId: userId,
             type: 1
         })
-        response.commentResponseList.forEach((item)=>{
-            total_comments.map((comment)=>{
-                if(item.topId===comment.id) {
+        response.commentResponseList.forEach((item) => {
+            total_comments.map((comment) => {
+                if (item.topId === comment.id) {
                     comment.replyLen += 1
                     comment.replyIdList.push({
                         senderName: item.nickName,
                         senderId: item.userId,
                         receiverName: item.receiverName,
                         receiverId: item.parentId,
-                        avatar: item.coverUrl, 
+                        avatar: item.coverUrl,
                         content: item.content,
-                        likeCount: item.likeCount, 
+                        likeCount: item.likeCount,
                         isLike: item.isLike,
                         createtime: item.createTime
                     })
@@ -74,6 +74,13 @@ export const fetchAllComments = async(videoId, userId) => {
         commentData: total_comments
     }
 }
+export const getComment = (videoId, userId, type) => {
+
+    ///comment/getComment/{videoId}/{userId}/{type}
+    return request.get(`/comment/getComment/${videoId}/${userId}/${type}`)
+
+}
+
 
 /**
  * 发表评论
@@ -83,19 +90,19 @@ export const fetchAllComments = async(videoId, userId) => {
  * @param receiverId
  * @param videoId
  */
-export const addComment = async(content,senderId, parentId, receiverId, videoId) => {
-    try{
+export const addComment = async (content, senderId, videoId, receiverId, parentId) => {
+    try {
         const postUrl = '/comment/comment'
         console.log(`看下发表的评论`)
         await request.post(postUrl, {
             content: content,
-            parentId: receiverId,
-            topId: parentId,
+            parentId: parentId,
+            topId: receiverId,
             userId: senderId,
             videoId: videoId
         })
         return true // 无参数，只要是200都能用
-    }catch(e){
+    } catch (e) {
         console.error("发表评论失败:", e)
     }
 }
@@ -103,13 +110,13 @@ export const addComment = async(content,senderId, parentId, receiverId, videoId)
 /**
  * 编辑评论
  */
-export const editComment = async(content,senderId) => {
+export const editComment = async (content, senderId) => {
 
 }
 
 /**
  * 删除评论
  */
-export const deleteComment = async(content,senderId) => {
+export const deleteComment = async (content, senderId) => {
 
 }

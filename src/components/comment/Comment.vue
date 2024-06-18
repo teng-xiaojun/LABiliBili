@@ -22,7 +22,7 @@
             </div>
             <div v-else class="flex-based-container">
                 <!-- <img v-lazy="getCommentInfo.avatar" class="user-avatar second-common-avatar" /> -->
-                <div class="info-item comment-username">
+                <div class="info-item comment-username" >
                     <span class="font-second-color">{{getCommentInfo.senderName}}</span> 回复 <span class="font-second-color">{{getCommentInfo.receiverName}}</span> </div>
                 <div class="info-item comment-content reply-content font-fifth-color">{{getCommentInfo.content}}</div>
             </div>
@@ -33,15 +33,16 @@
                     <img v-else src="@/assets/img/comment/yes_thumbsUp.svg" alt="已点赞" style="width: 1rem;" />
                     <p>{{commentInfo.likeCount}}</p>
                 </div>
-                <div class="reply-btn change-color-btn" @click="changeReplyStatus()">
-                    回复
+                <div class="reply-btn change-color-btn"   @click="changeReplyStatus()">
+                    回复 
                 </div>
+            </div>
+            <div v-if="isReply" >
+            <replyVue :value="sendUser" @isShow="isShow" />
             </div>
         </div>
         <!--如果回复评论-->
-        <div v-if="isReply" class="my-reply">
-            <replyVue :value="sendUser" />
-        </div>
+      
     </div>
 </template>
 
@@ -67,17 +68,28 @@ const props = defineProps({
     type: {
         type: String,
         required: true
+    },
+    userId:{
+        type:Number,
+        default:0,
+    },
+    topId:{
+        typeof:Number
+    },
+    parentId:{
+        typeof:Number
     }
 })
+const emits = defineEmits('getData')
 const getCommentInfo = ref(props.commentInfo) // 评论内容
 const getCommentType = props.type // 评论类型
 const getVideoId = props.videoId // 视频Id
 const isReply = ref(false) // 是否回复本评论
 // 向下一级子组件传递的评论发布区（回复）数据
 const sendUser = {
-    senderId: 0,
-    parentId: 0,
-    receiverId: 0,
+    senderId: props.userId,
+    parentId: props.parentId,
+    receiverId: props.topId,
     videoId: getVideoId,
     avatar: require("@/assets/img/avater.png")
 }
@@ -101,6 +113,12 @@ const changeThumbsUpStatus = async() =>{
 const changeReplyStatus = () => {
     isReply.value = !isReply.value
 }
+const isShow = () => {
+    changeReplyStatus();
+    emits('getData')
+
+}
+
 // 操作评论
 const handleEdit = (command) => {
     switch(command) {

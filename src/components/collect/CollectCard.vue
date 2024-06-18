@@ -28,9 +28,9 @@
             class="flex-left-container collect-flex-wrap">
               <div v-if="isVideoDetail">
                 <input :id="item.id" type="checkbox" name="collect" 
-                style="display: flex; margin-right: 1.5rem;" v-model="currentToCollection[index]" />
+                style="display: flex; margin-right: 1.5rem;"  class="checkCollect" :data-id="item.id" />
               </div>
-              <collectionItem class="collect-item flex-between-container" :data="item">
+              <collectionItem class="collect-item flex-between-container" :data="item" @updataEdit = 'updataEdit' @deleteData="deleteData" >
                 <div class="flex-center-container">
                   <el-checkbox v-model="item.checked" class="collect-item-checkbox">
                   <p class="collect-item-title">{{item.name}}</p> 
@@ -52,32 +52,33 @@
     <template #footer>
       <div class="dialog-footer flex-column-center-container">
         <div class="add-wrap flex-center-container common-based-btn" 
-        @click="isNewCollection=true">
+        @click="showDom('add')">
           <img src="@/assets/img/utils/plus.svg" />
         </div>
         <div class="true flex-center-container detail-btn common-based-btn" 
-        @click="onSubmit()">确定</div>
+        @click="onSubmit">确定</div>
       </div>
     </template>
   </el-dialog>
   <!--自定义弹窗：创建重新-->
-  <div v-if="isNewCollection" 
+  <div v-show="isNewCollection" 
   class="collection-mask self-center-box-first 
   flex-center-container" @click="handleMaskClick">
     <newCollectionVue class="createNewCollection" @click.stop 
-    @update:isShow="upNewCollection()" :key="collectKey" />
+    @update:isShow="upNewCollection()" :key="collectKey" ref="CollectionVue"  @getData='getData'/>
   </div>
   </div>
 </template>
 
 <script setup>
 import { defineProps, defineEmits, defineAsyncComponent, 
-  ref, computed, onMounted, provide } from 'vue'
-import { fetchCollection, editVideoToCollect, fetchVideoInCollect } 
-from "@/api/like_and_collect"
+  ref, computed, onMounted, provide, 
+nextTick} from 'vue'
+import { fetchCollection, editVideoToCollect, fetchVideoInCollect,deleteCollections } from "@/api/like_and_collect"
 import { useUserInfo } from "@/store/userInfo"
 import collectFolder from '@/assets/data/collectFolder'
 import { ElMessage } from 'element-plus'
+
 const userInfo = useUserInfo() // 使用登录信息
 const userId = userInfo.getId() // 登录用户的id
 const isNewCollection = ref(false) // 是否新建文件夹
@@ -85,6 +86,40 @@ const collectData = ref([]) // 收藏夹数据
 const currentToCollection = ref([]) // 当前视频被哪些收藏夹，videoId对应collectionId
 const eachTotalNum = ref(0)
 const collectKey = ref(0)
+
+let CollectionVue = ref()
+
+const showDom=(type,row) =>{
+  isNewCollection.value = true
+  if(type == 'add'){
+    nextTick(()=>{
+      CollectionVue.value.clearData()
+    })
+  }else if(type === 'edit'){
+    // console.log(row);
+    nextTick(()=>{
+       CollectionVue.value.handleEdit(row)
+
+    })
+   
+  }
+ 
+
+  
+}
+const updataEdit = (row)=>{
+  showDom('edit',row)
+}
+const deleteData = async (row)=>{
+   await deleteCollections(row.id)
+  //  console.log(res);
+  collectData.value = await fetchCollection(userId)
+}
+
+const getData = async() => {
+  collectData.value = await fetchCollection(userId)
+}
+
 // 点击蒙版外的会退出弹窗
 const handleMaskClick = (event) => {
   if (!event.target.classList.contains('createNewCollection')) {
@@ -101,7 +136,6 @@ const collectionItem = defineAsyncComponent(()=>
 provide('isUpdateCollection', {
   isNewCollection,
   updateCollection(val) {
-    ElMessage.error('为什么还是不行')
     collectKey.value += 1
     isNewCollection.value = val
   },
@@ -155,10 +189,10 @@ const isShow = computed({ // 只读，不能实时修改；但使用computed会�
   }
 })
 // 更新当前的Collection
-// const upNewCollection = () => {
-//   isNewCollection.value = false
+const upNewCollection = () => {
+
   
-// }
+}
 // 计算当前videoId被哪些收藏夹收藏了
 const whichCollections = (videoId, collectionArray) => {
   if (!Array.isArray(collectionArray)) {
@@ -180,17 +214,39 @@ const aboutToCollect = () => {
 
 }
 // 上传
-const onSubmit = (val) => {
-  emits('change:isAdded', true) 
+const onSubmit = () => {
+  let inp = document.querySelectorAll('.checkCollect');
+    let arr = [];
+    inp.forEach
+  console.log(inp);
+  // let val = inp.find((item)=>{
+  //   return item.checked
+  // })
+  // if(!val) return ElMessage({
+  //   type:'warning',
+  //   message:'请先勾选文件夹'
+  // })
+  // emits('checkDir',val)
+  // emits(, ) 
   // 退出页面
-  isShow.set(false)
+  // isShow.set(false)
 }
+
+
+// const handleChange = (e)=>{
+//   let dom = document.querySelectorAll('input')
+//   dom.forEach((item)=>{
+//     item.checked = false;
+//   })
+//   e.target.checked = true
+// }
+
 onMounted(async()=>{
   if(isCollected.value) { // 有被收藏过
     collectData.value = await fetchCollection(userId)
     const collections = await fetchVideoInCollect(userId)
     currentToCollection.value = new Array(collectData.value.length).fill(false)
-    whichCollections(props.videoId, collections)
+    // whichCollections(props.videoId, collections)
   }
   eachTotalNum.value = collectFolder["eachLength"]
 })

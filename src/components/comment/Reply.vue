@@ -23,8 +23,9 @@ const props = defineProps({
         required: true
     }
 })
+
 const getSendUser = ref(props.value)
-const emits = defineEmits(['send:returnReply'])
+const emits = defineEmits(['send:returnReply','isShow','getData'])
 const replyComputed = computed({
     get: () => content.value,
     set: function(val) {
@@ -38,26 +39,30 @@ const replyComputed = computed({
 const sendComment = async() => {
     // 验证评论
     
-    // 前端显示：要传递到CommentPanel中的列表里
-    replyComputed.value = {
-        id: 0,
-        avatar: getSendUser.value,
-        senderId: getSendUser.value,
-        senderName: "",
-        content: content.value,
-        createtime: "2024",
-        likeCount: 0,
-        isLike: false,
-    }
+    // // 前端显示：要传递到CommentPanel中的列表里
+    // replyComputed.value = {
+    //     id: 0,
+    //     avatar: getSendUser.value,
+    //     senderId: getSendUser.value,
+    //     senderName: "",
+    //     content: content.value,
+    //     createtime: "2024",
+    //     likeCount: 0,
+    //     isLike: false,
+    // }
     // 传递到后
-    console.log('咕咕', content.value)
+    // console.log('咕咕', content.value)
+    if(!content.value) return
+    // console.log('des', props.value);
+
     const res = await addComment(content.value, 
-        getSendUser.value.senderId, getSendUser.value.parentId, 
-        getSendUser.value.receiverId, getSendUser.value.videoId)
-    console.log('评论数据传递：结果', res)
+        getSendUser.value.senderId, getSendUser.value.videoId,getSendUser.value.receiverId,getSendUser.value.parentId)
+        console.log('评论数据传递：结果', res)
     // 清空当前
     if(res){
         content.value = ""
+        emits('isShow')
+        emits('getData')
     }else{
         ElMessage.error('发布评论失败')
     }

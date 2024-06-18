@@ -32,18 +32,18 @@ module.exports = defineConfig({
   //   }))
   // },
   // productionSourceMap: false,
-  devServer:{
-    host: '127.0.0.12',
+  devServer: {
+    host: 'localhost',
     port: 2023,
-    client:{
-      webSocketURL: 'ws://127.0.0.12:2023/ws'
-    },
-    headers:{
+    // client:{
+    //   webSocketURL: 'ws://127.0.0.12:2023/ws'
+    // },
+    headers: {
       'Access-Control-Allow-Origin': '*',
     },
     open: true, //自动打开项目
     // NOTE 跨域配置
-    proxy:{
+    proxy: {
       '/api': {
         // target: "yjgbfgsb.beesnat.com:13324", // 搜索
         // target: 'http://zsriw8kz.beesnat.com', // 视频
@@ -69,7 +69,7 @@ module.exports = defineConfig({
           '^/apis': ''
         }
       },
-      
+
 
 
     }
