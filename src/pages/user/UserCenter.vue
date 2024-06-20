@@ -51,7 +51,7 @@ const menuConfig = reactive([
     icon: "Compass",
     index: `/userCenter/permission/${upId}`,
     title: "设置权限",
-    permiss: true
+    permiss: upId == userId
   },
 ])
 // },
