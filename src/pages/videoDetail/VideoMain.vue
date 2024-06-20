@@ -29,12 +29,12 @@
                         </div>
                     </div>
                     <!--XXX 补充：分享-->
-                    <span @click="isShare = true" class="share"><!--  @mouseleave="isShare=false"-->
+                    <!-- <span @click="isShare = true" class="share">
                         <p class="share-btn common-btn-center">分享</p>
                         <shareCard v-if="isShare" class="share-card" :isShare="isShare" />
-                    </span>
+                    </span> -->
                     <!--XXX 补充：其他功能-->
-                    <span class="other-function common-btn-center">
+                    <!-- <span class="other-function common-btn-center">
                         <el-dropdown @command="handleMoreFunc">
                             <img src="@/assets/img/utils/more.svg" style="width: 0.8rem;" />
                             <template #dropdown>
@@ -43,8 +43,8 @@
                                     <el-dropdown-item command="report">举报</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
-                        </el-dropdown>
-                    </span>
+</el-dropdown>
+</span> -->
                 </div>
             </div>
             <div class="video-author">
@@ -61,7 +61,8 @@
                     </div>
                     <div class="video-intro">
                         <!--如果不是全屏，则不展示-->
-                        <div v-if="!isExpandIntro">
+                        <p class="long-text-expanded">{{ videoInfo.intro }}</p>
+                        <!-- <div v-if="!isExpandIntro">
                             <p class="long-text-collapsed intro-collapsed">{{ videoInfo.intro }}</p>
                             <div class="change-color-btn change-info-status-btn font-fifth-color"
                                 @click="isExpandIntro = true">展开
@@ -72,15 +73,15 @@
                             <div class="change-color-btn change-info-status-btn font-fifth-color"
                                 @click="isExpandIntro = false">收起
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <!--视频的tags-->
-                <div v-if="video_tags" class="video-tags">
+                <!-- <div v-if="video_tags" class="video-tags">
                     <div class="video-tag-item tags-and-labels flex-based-container"
                         v-for="(tag, index) in transferToList(video_tags)" :key="index" @click="searchRes(tag, 'tag')">
                         {{ tag }}</div>
-                </div>
+                </div> -->
             </div>
         </div>
         <!--收藏弹窗-->

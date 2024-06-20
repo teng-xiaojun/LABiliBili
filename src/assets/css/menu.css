@@ -12,7 +12,7 @@
 .el-menu-item{
     font-size: 1.3rem !important;
     font-weight: 500 !important;
-    margin: 1rem 0.1rem;
+    /* margin: 1rem 0.1rem; */
     width: 5rem;
     .el-icon{
         margin-right: 1.4rem !important;
@@ -34,7 +34,7 @@
 }
 .el-popuper { /*el-menu--popup*/
     .el-menu-item {
-        width: 10rem;
+        width: 13rem;
         height: 2rem;
         text-align: center;
         &:first-child{

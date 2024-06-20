@@ -3,42 +3,47 @@
     <div class="chat-box">
 
         <div class="chat-history">
-            <el-scrollbar v-if="chatData" style="height: 100%;">
-                <div v-for="(chatItem, index) in chatData" :key="index"
-                    v-show="chatItem.type == props.type || !chatItem.type">
-                    <div class=" chat-history-item left-side flex-based-container" :class="{
+            <el-scrollbar v-if="chatData" style="height: 100%;" ref="scroll">
+                <div ref="chatHistoryContent">
+                    <div v-for="(chatItem, index) in chatData" :key="index"
+                        v-show="chatItem.type == props.type || !chatItem.type">
+                        <div class=" chat-history-item left-side flex-based-container" :class="{
                 'left-side': chatItem.upId !== userId,
                 'right-side': chatItem.upId === userId
             }" :style="{ 'flexDirection': chatItem.upId === userId ? 'row-reverse' : 'row' }">
-                        <ProfileCard class="chat-avatar" :avatar="currentPerson.avatar" :id="currentPerson.userId" />
-                        <div :class="{
+                            <ProfileCard class="chat-avatar" :avatar="currentPerson.avatar"
+                                :id="currentPerson.userId" />
+                            <div :class="{
                 'chat-item-bg-other': chatItem.upId !== userId,
                 'chat-item-bg-me': chatItem.upId === userId
             }" class="chat-item-bg chat-item-bg-other">
-                            <p v-if="chatItem.upId !== 0">{{ chatItem.content }}</p>
-                            <div v-else>
-                                <template v-if="chatItem.type == '0'">
-                                    <p>{{ chatItem.content }}</p>
-                                </template>
-                                <template v-if="chatItem.type == '1'">
-                                    <img :src="chatItem.content" alt="" style="width: 100%;">
-                                </template>
-                                <template v-if="chatItem.type == '2'">
-                                    <img :src="chatItem.imgSrc" alt="" style="width: 100%;">
-                                    <template v-for="(i, index) in chatItem.content" :key="index">
-                                        <h1 v-show="i.index.split('.').length == 1" style="font-size: 20px;">{{
-                i.themeName }}</h1>
-                                        <h2 v-show="i.index.split('.').length == 2" style="font-size: 16px;">{{
-                i.themeName }}</h2>
-                                        <p v-show="i.index.split('.').length == 2" style="font-size: 14px;">{{ i.text }}
-                                        </p>
+                                <p v-if="chatItem.upId !== 0">{{ chatItem.content }}</p>
+                                <div v-else>
+                                    <template v-if="chatItem.type == '0'">
+                                        <p>{{ chatItem.content }}</p>
                                     </template>
-                                </template>
+                                    <template v-if="chatItem.type == '1'">
+                                        <img :src="chatItem.content" alt="" style="width: 100%;">
+                                    </template>
+                                    <template v-if="chatItem.type == '2'">
+                                        <img :src="chatItem.imgSrc" alt="" style="width: 100%;">
+                                        <template v-for="(i, index) in chatItem.content" :key="index">
+                                            <h1 v-show="i.index.split('.').length == 1" style="font-size: 20px;">{{
+                i.themeName }}</h1>
+                                            <h2 v-show="i.index.split('.').length == 2" style="font-size: 16px;">{{
+                i.themeName }}</h2>
+                                            <p v-show="i.index.split('.').length == 2" style="font-size: 14px;">{{
+                i.text }}
+                                            </p>
+                                        </template>
+                                    </template>
 
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </el-scrollbar>
             <div v-else>
                 <img src="@/assets/img/utils/noData.png" />
@@ -63,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, defineProps, watch } from "vue"
+import { ref, onMounted, onBeforeUnmount, defineProps, watch, nextTick } from "vue"
 import { fetchChatHistory, addReply, changeSessionTime, editChatToRead, getImage, getPPT, addNewChat } from "@/api/chat"
 import { useChat } from "@/store/chat"
 import { useUserInfo } from "@/store/userInfo"
@@ -79,6 +84,8 @@ const chatData = ref([]) // 用户聊天的记录
 const bigModelData = ref('') // 大模型发的消息
 const reply = ref('') // 发送消息框
 const route = useRoute()
+const scroll = ref()
+const chatHistoryContent = ref()
 // 对方用户
 // const currentPerson = inject("chatting")
 const props = defineProps({
@@ -133,19 +140,31 @@ const getImageData = async (val) => {
     return res;
 }
 
-socket.onmessage = (event) => {
+socket.onmessage = async (event) => {
     console.log('111', event);
     let message = JSON.parse(event.data)
 
     if (message.type === 'sessionId') {
         chatSession.setSessionId(message.sessionId)
     } else if (message.type === 'message') {
-        chatData.value.push({
-            id: message.id,
-            createTime: message.createTime,
-            upId: currentPerson.value.upId,
-            content: message.content,
-        })
+        // chatData.value.push({
+        //     id: message.id,
+        //     createTime: message.createTime,
+        //     upId: currentPerson.value.upId,
+        //     content: message.content,
+        // })
+
+        if (message.senderId == props.upId) {
+            await getData()
+            // await changeSessionTime(userId, props.upId, message.content)
+            await editChatToRead(userId, Number(props.upId))
+        } else {
+            console.log('当前不是这个对话框');
+            emits('getList')
+            // await changeSessionTime(userId, Number(message.senderId), message.content)
+
+        }
+
     } else if (message.type === 'bigmodel') {
 
         if (message.status === 0) {
@@ -205,12 +224,23 @@ socket.onerror = function (event) {
 socket.onclose = function (event) {
     console.log("Connection closed")
 }
+
+const emits = defineEmits(['getList'])
 // 获取历史聊天数据
 const getData = async () => {
     if (currentPerson.value.upId !== 0) {
         chatData.value = await fetchChatHistory(userId, currentPerson.value.upId)
         console.log('66', chatData.value);
+        // let scoll = document.querySelector('.scross');
+        // console.log('scoll', scoll);
+        // scoll.scrollTop = scoll.scrollHeight;
         // currentPerson.value.upId = chatData.value[0].upId
+        nextTick(() => {
+            // console.log(chatHistoryContent.value.clientHeight);
+            scroll.value && scroll.value.setScrollTop(chatHistoryContent.value.clientHeight)
+        })
+
+        // scroll.value && (scroll.value.wrap.scrollTo = )
     }
 }
 // 发送文本消息
@@ -255,16 +285,13 @@ const submitReply = async () => {
                 })
                 reply.value = ''
             } else {
-                let res = await addNewChat(userId, currentPerson.value.upId, reply.value);
-                // chatData.value.push({
-                //     id: 99999,
-                //     createTime: new Date(),
-                //     upId: userId,
-                //     content: reply.value,
-                //     leastMessage: reply.value,
-                //     type: '0'
-                // })
-                getData()
+                await addNewChat(userId, Number(currentPerson.value.upId), reply.value);
+                await getData()
+                // await changeSessionTime(userId, Number(currentPerson.value.upId), reply.value)
+                emits('getList')
+                reply.value = ''
+
+
 
             }
 

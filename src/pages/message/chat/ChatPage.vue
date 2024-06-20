@@ -3,7 +3,7 @@
     <div class="chat-panel">
         <!--左侧用户列表-->
         <div class="chat-userList">
-            <chatListVue @handleChange="handleChange" />
+            <chatListVue @handleChange="handleChange" ref="chatList" />
         </div>
         <!--纵轴隔-->
         <div class="message-vertical-divided here-vertical-divided"></div>
@@ -18,7 +18,7 @@
                     <el-tab-pane label="PPT" name="2"></el-tab-pane>
                 </el-tabs>
             </div>
-            <chatContentVue :type="type" :upId="currentPerson.upId" :type2="currentPerson.type" />
+            <chatContentVue :type="type" :upId="currentPerson.upId" :type2="currentPerson.type" @getList="getLIst" />
         </div>
     </div>
 </template>
@@ -33,6 +33,7 @@ import { useRoute } from 'vue-router'
 const userInfo = useUserInfo() // 使用登录信息 
 const userId = userInfo.getId() // 登录用户的id
 const chatSession = useChat() // 使用聊天信息
+const chatList = ref()
 const chatListVue = defineAsyncComponent(() =>
     import("./ChatObj.vue")
 )
@@ -52,6 +53,9 @@ const defaultBigModel = { // 默认是大模型的id
 }
 const currentPerson = ref(defaultBigModel)
 
+const getLIst = () => {
+    chatList.value.getData()
+}
 
 
 

@@ -2,8 +2,7 @@
 <template>
     <div class="message-panel">
         <!--左栏选择-->
-        <SidebarPanel style="margin-top: -1rem;" class="message-sidebar" :id="1" :menuConfig="menuConfig"
-            :isCollapseVal="isHalf" />
+        <SidebarPanel class="message-sidebar" :id="1" :menuConfig="menuConfig" :isCollapseVal="isHalf" />
         <!--中间-->
         <message-content>
             <router-view v-slot="{ Component }">
@@ -32,11 +31,6 @@ const menuConfig = [{
     index: `/message/Reply/${id}`,
     title: "回复我的",
     permiss: true, // 本页面没有权限的配置
-}, {
-    icon: "Help",
-    index: `/message/At/${id}`,
-    title: "@我的",
-    permiss: true,
 }, {
     icon: "Present",
     index: `/message/ThumbsUpMe/${id}`,

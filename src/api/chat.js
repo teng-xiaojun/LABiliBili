@@ -19,7 +19,9 @@ export const fetchAllPeople = async (userId) => {
             upId: item.userId,
             leastMessage: item.updateContent,
             leastMessageFrom: 1, // 0是不存在，1是自己，2是对方
-            type: 0
+            type: 0,
+            status: item.status,
+            count: item.count
         }))
     } catch (e) {
         ElMessage.error(`获取所有用户列表错误：${e}`)

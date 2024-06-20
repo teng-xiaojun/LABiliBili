@@ -1,36 +1,23 @@
-  <template>
-    <el-aside>
-    <el-menu
-      :default-active="onRoutes"
-      :collapse="collapse"
-      background-color="rgba(94,73,238,1)"
-      text-color="#ffffff"
-      active-text-color="#f7da94"
-      unique-opened
-      :router=true
-    >
-      <template v-for="(item,index) in items" :key="index"
-        ><!--NOTE v-for没有key属性会报错-->
+<template>
+  <el-aside>
+    <el-menu :default-active="onRoutes" :collapse="collapse" background-color="rgba(94,73,238,1)" text-color="#ffffff"
+      active-text-color="#f7da94" unique-opened :router=true>
+      <template v-for="(item, index) in items" :key="index">
         <template v-if="item.subs">
           <el-sub-menu v-if="item.permiss" :index="item.index" popper-class="el-popuper">
-            <template #title><!--NOTE template不会渲染元素而是包装，#/slot是命名插槽、可以控制特定内容-->
+            <template #title>
               <el-icon class="main-icon">
                 <component :is="item.icon"></component>
               </el-icon>
               <span v-if="!collapse">{{ item.title }}</span>
             </template>
-            <el-menu-item v-for="(subItem, index_) in item.subs" :key="index_"
-              :index="subItem.index"
-            >
+            <el-menu-item v-for="(subItem, index_) in item.subs" :key="index_" :index="subItem.index">
               <div v-if="subItem.permiss" class="main-title">{{ subItem.title }}</div>
             </el-menu-item>
           </el-sub-menu>
         </template>
         <template v-else>
-          <el-menu-item
-            :index="item.index"
-            v-if="item.permiss"
-          >
+          <el-menu-item :index="item.index" v-if="item.permiss">
             <el-icon>
               <component :is="item.icon"></component>
             </el-icon>
@@ -40,7 +27,7 @@
       </template>
     </el-menu>
   </el-aside>
-  </template>
+</template>
 
 <script setup>
 import { computed, ref, defineProps } from "vue"
@@ -67,7 +54,7 @@ const items = props.menuConfig
 const onRoutes = computed(() => {
   return route.path;
 });
-const collapse = computed(() =>{
+const collapse = computed(() => {
   return props.isCollapseVal
 })
 </script>

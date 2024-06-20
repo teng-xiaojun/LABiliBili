@@ -28,6 +28,7 @@
             }">{{ chatPerson.leastMessage.length >= 10 ?
                 chatPerson.leastMessage.substr(0, 9) + "..." : chatPerson.leastMessage }}</p>
                 </div>
+                <div v-if="!chatPerson.status" class="weidu">{{ chatPerson.count }}</div>
             </div>
         </div>
         <!--后续数据-->
@@ -71,36 +72,78 @@ const bigModelTunnel = () => {
 
 // 修改当前用户的Tunnel
 const changeTunnel = (Tunnel) => {
+    console.log('Tunnel', Tunnel);
     currentPerson.value = Tunnel
+    // editChatToRead(userId,)
+
 }
 
-onMounted(async () => {
-    // 获得聊天对象列表
+const getData = async () => {
     personList.value = await fetchAllPeople(userId)
-
     let list = JSON.parse(sessionStorage.getItem('commentInfo'))
-    console.log('list', list);
     if (list) {
-        personList.value && personList.value.unshift({
-            avatar: list.senderCoverUrl,
-            createTime: new Date(),
-            upName: list.senderName,
-            upId: list.senderId,
-            leastMessage: "",
-            leastMessageFrom: 0,
-            type: 1
-
+        let obj = personList.value.find((item) => {
+            return item.upId == list.senderId
         })
-        currentPerson.value = {
-            avatar: list.senderCoverUrl,
-            createTime: new Date(),
-            upName: list.senderName,
-            upId: list.senderId,
-            leastMessage: "",
-            leastMessageFrom: 0,
-            type: 1
+        if (list && !obj) {
+            personList.value && personList.value.unshift({
+                avatar: list.senderCoverUrl,
+                createTime: new Date(),
+                upName: list.senderName,
+                upId: list.senderId,
+                leastMessage: "",
+                leastMessageFrom: 0,
+                type: 1
+
+            })
+
+        } else if (list && obj) {
+
         }
     }
+}
+
+defineExpose({
+    getData
+})
+
+onMounted(() => {
+    // 获得聊天对象列表
+
+    fetchAllPeople(userId).then((res) => {
+        personList.value = res
+        let list = JSON.parse(sessionStorage.getItem('commentInfo'))
+
+        if (list) {
+            let obj = personList.value.find((item) => {
+                return item.upId == list.senderId
+            })
+            if (list && !obj) {
+                personList.value && personList.value.unshift({
+                    avatar: list.senderCoverUrl,
+                    createTime: new Date(),
+                    upName: list.senderName,
+                    upId: list.senderId,
+                    leastMessage: "",
+                    leastMessageFrom: 0,
+                    type: 1
+
+                })
+                currentPerson.value = {
+                    avatar: list.senderCoverUrl,
+                    createTime: new Date(),
+                    upName: list.senderName,
+                    upId: list.senderId,
+                    leastMessage: "",
+                    leastMessageFrom: 0,
+                    type: 1
+                }
+            } else if (list && obj) {
+                currentPerson.value = obj
+            }
+        }
+
+    })
 
 })
 /**
@@ -154,13 +197,20 @@ watch(() => currentPerson.value, (val) => {
 
 .chat-item {
     margin: 0.5rem 0 0.5rem 0.5rem;
-    width: 91%;
-    padding: 0.5rem;
+    width: 100%;
+    position: relative;
+    // padding: 0.5rem;
     cursor: pointer;
 
     &:active {
         background: #d3def5;
         border-radius: 10px;
+    }
+
+    .weidu {
+        position: absolute;
+        right: 10px;
+        top: 10px;
     }
 }
 
@@ -244,5 +294,16 @@ watch(() => currentPerson.value, (val) => {
     font-size: 0.9rem;
     padding: 0.1rem 0.2rem;
     color: #fff;
+}
+
+.weidu {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    background-color: red;
+    color: #fff;
+    border-radius: 50%;
+    float: right;
 }
 </style>
