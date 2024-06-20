@@ -1,5 +1,6 @@
 import { ElMessage } from "element-plus"
 import { useUserInfo } from '@/store/userInfo'
+import { fetchUserInfo } from '@/api/user'
 const userInfo = useUserInfo() // 保存登录信息
 
 /**
@@ -44,13 +45,17 @@ export const isMeetReg = (typeId, inputStr, errorMessage) => {
 }
 
 // 保存用户信息
-export const setUser = (loginRes) => {
+export const setUser = async (loginRes) => {
+    console.log('setUser', loginRes);
     const userId = loginRes.userId
     if (userId > 0 && typeof userId === 'number' && loginRes.status) {
+        let res = await fetchUserInfo(userId, userId);
+        console.log('userInfo', res);
         console.log(`登录的结果${userId}`)
         ElMessage.success('登录成功')
 
-        userInfo.setId(userId) // 保存本地信息
+        // userInfo.setId(userId) // 保存本地信息
+        userInfo.setAll(res.name, res.id, res.avatar)
         return true
     } else {
         ElMessage.error(`登录失败，无法获取userId(${loginRes})。请检查用户名/账号、密码或验证码`)

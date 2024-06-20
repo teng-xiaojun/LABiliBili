@@ -20,15 +20,15 @@
                 <img :src="chatPerson.avatar" class="first-common-avatar chat-avatar" />
                 <div class="flex-column-left-max-container">
                     <p style="font-weight: 600;">{{ chatPerson.upName.length >= 9
-                ? chatPerson.upName.substr(0, 8) + "..."
-                : chatPerson.upName }}</p>
+                        ? chatPerson.upName.substr(0, 8) + "..."
+                        : chatPerson.upName }}</p>
                     <p style="font-size: 0.9rem;" :class="{
-                'me-message': chatPerson.leastMessageFrom === 1,
-                'other-message': chatPerson.leastMessageFrom === 2
-            }">{{ chatPerson.leastMessage.length >= 10 ?
+                        'me-message': chatPerson.leastMessageFrom === 1,
+                        'other-message': chatPerson.leastMessageFrom === 2
+                    }">{{ chatPerson.leastMessage.length >= 10 ?
                 chatPerson.leastMessage.substr(0, 9) + "..." : chatPerson.leastMessage }}</p>
                 </div>
-                <div v-if="!chatPerson.status" class="weidu">{{ chatPerson.count }}</div>
+                <div v-if="!chatPerson.status && chatPerson.type !== 1" class="weidu">{{ chatPerson.count }}</div>
             </div>
         </div>
         <!--后续数据-->

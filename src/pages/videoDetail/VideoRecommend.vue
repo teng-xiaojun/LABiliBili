@@ -55,6 +55,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {
     ChatLineRound, Plus
 } from '@element-plus/icons-vue'
+import { fetchUserInfo } from '@/api/user'
 const recommendVue = defineAsyncComponent(() =>
     import("@/components/video/VideoCard.vue")
 )
@@ -95,17 +96,17 @@ const updateIndex = (newIndex) => {
     currentIndex.value = newIndex
 }
 
-const upInfo = {
-    name: '我是十四哦',
-    img: require('@/assets/img/utils/avatar_new_01.jpg'),
-    text: '我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是十四哦我是',
-
-}
+const upInfo = ref({})
 
 const router = useRouter()
 
 const handleMessage = () => {
-    // sessionStorage.setItem('commentInfo', JSON.stringify(getCommentInfo.value))
+    let obj = {
+        senderCoverUrl: upInfo.value.img,
+        senderName: upInfo.value.name,
+        senderId: upInfo.value.id,
+    }
+    sessionStorage.setItem('commentInfo', JSON.stringify(obj))
     router.push({ path: `/message/MyChat/${userId}` })
 }
 
@@ -118,6 +119,17 @@ onMounted(async () => {
     otherCompilationsVideos.value = await fetchVideosFromCompilations(userId, videoId)
     // 调用推荐接口
     recommendVideos.value = await getRecommendVideos(videoId)
+    console.log('route', route);
+    let id = +route.query.upId
+    let res = await fetchUserInfo(id, id)
+    console.log('44444', res);
+    upInfo.value = {
+        name: res.name,
+        img: res.avatar,
+        text: res.intro,
+        id: res.id
+    }
+
 })
 </script>
 
@@ -193,7 +205,7 @@ onMounted(async () => {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 90%;
+            width: 60%;
             margin: 10px 0;
             color: #9499a0;
             // width: 150px;
