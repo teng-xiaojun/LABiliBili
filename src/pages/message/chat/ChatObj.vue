@@ -26,7 +26,7 @@
                         'me-message': chatPerson.leastMessageFrom === 1,
                         'other-message': chatPerson.leastMessageFrom === 2
                     }">{{ chatPerson.leastMessage.length >= 10 ?
-                chatPerson.leastMessage.substr(0, 9) + "..." : chatPerson.leastMessage }}</p>
+                        chatPerson.leastMessage.substr(0, 9) + "..." : chatPerson.leastMessage }}</p>
                 </div>
                 <div v-if="!chatPerson.status && chatPerson.type !== 1" class="weidu">{{ chatPerson.count }}</div>
             </div>
@@ -38,7 +38,7 @@
 
 <script setup>
 import { onMounted, onBeforeMount, ref, inject, defineProps, watch, } from 'vue'
-import { fetchAllPeople, addNewChat, changeSessionTime } from "@/api/chat"
+import { fetchAllPeople, addNewChat, changeSessionTime, editChatToRead } from "@/api/chat"
 import { fetchFollowingsList, fetchFollowersList } from "@/api/user"
 import { useUserInfo } from "@/store/userInfo"
 import { useChat } from "@/store/chat"
@@ -73,7 +73,8 @@ const bigModelTunnel = () => {
 // 修改当前用户的Tunnel
 const changeTunnel = (Tunnel) => {
     console.log('Tunnel', Tunnel);
-    currentPerson.value = Tunnel
+    currentPerson.value = Tunnel;
+
     // editChatToRead(userId,)
 
 }
@@ -157,12 +158,20 @@ onMounted(() => {
     unreadNum: 1, // 未读新消息的条数 
  */
 const emits = defineEmits(['handleChange'])
-watch(() => currentPerson.value, (val) => {
-    console.log(222, val);
+watch(() => currentPerson.value, async (val) => {
+    console.log('222', val);
     if (val.upId == userId) {
         return ElMessage({
             type: 'warning',
             message: '您不能和自己聊天哦'
+        })
+    }
+    if (!val.status) {
+        await editChatToRead(userId, Number(val.upId));
+        personList.value.forEach((item) => {
+            if (item.upId === val.upId) {
+                item.status = true
+            }
         })
     }
     emits('handleChange', val)
