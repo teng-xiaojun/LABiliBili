@@ -5,7 +5,7 @@
   <div class="common-box">
     <!--TODO：待删-->
     <p>
-      <el-button type="text" @click="turnToBigModel()">{{ logInfo }}</el-button>
+      <el-button type="primary" @click="turnToBigModel()">{{ logInfo }}</el-button>
     </p>
   </div>
   <div class="main-page">
@@ -39,7 +39,7 @@ import { ElMessage } from 'element-plus'
 let startLoc = 1 // 当前位置0
 let probableData = [] // 可能放入的新数据
 let scrollToTopButton = document.getElementById('back-top-btn-id')
-const logInfo = '大模型'
+const logInfo = '大模型文生文、文生图、智能PPT 大模型体验'
 const isRemain = ref(true) // 是否仍然有新数据
 const debounce = new Debounce() // 防抖
 const userInfo = useUserInfo() // 保存登录信息

@@ -32,17 +32,17 @@
         </div>
         <!--相关信息-->
         <div class="video-detail" :class="{ 'flex-column-left-max-container': !isUpDown }" :style="{
-        'margin-left': isUpDown ? '' : '1rem',
-        'justify-content': isUpDown ? '' : 'center'
-    }">
+            'margin-left': isUpDown ? '' : '1rem',
+            'justify-content': isUpDown ? '' : 'center'
+        }">
             <div v-if="videoOverview.videoName" class="video-detail-item video-name title-font-color">
                 {{ videoOverview.videoName }}</div>
             <div class="content-font-color video-detail-text" :class="{
-        'flex-between-container': isUpDown,
-        'flex-column-left-max-container': !isUpDown
-    }">
+                'flex-between-container': isUpDown,
+                'flex-column-left-max-container': !isUpDown
+            }">
                 <span v-if="videoOverview.authorName" @click.stop="pushUserInfo(videoOverview.authorId)">{{
-        videoOverview.authorName }}</span>
+                    videoOverview.authorName }}</span>
                 <span v-if="videoOverview.createTime">{{ videoOverview.createTime }}</span>
             </div>
         </div>
@@ -51,8 +51,10 @@
 <script setup>
 import { ref, defineProps, toRaw } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserInfo } from "@/store/userInfo"
 const isShow = ref(false) // 视频是否展示 
 const isUpDown = ref(true) // 视频是否是上下布局
+const userInfo = useUserInfo()
 const props = defineProps({
     videoInfo: {
         type: Object,
@@ -112,7 +114,7 @@ window.imgOnError = function (imgElement) {
 }
 
 const pushUserInfo = (id) => {
-    console.log('pushUserInfo', id);
+    // console.log('pushUserInfo', id);
     router.push({
         path: `/userCenter/myItem/${id}`
     })

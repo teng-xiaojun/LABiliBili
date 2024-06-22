@@ -8,15 +8,15 @@
                     <div v-for="(chatItem, index) in chatData" :key="index"
                         v-show="chatItem.type == props.type || !chatItem.type">
                         <div class=" chat-history-item left-side flex-based-container" :class="{
-                'left-side': chatItem.upId !== userId,
-                'right-side': chatItem.upId === userId
-            }" :style="{ 'flexDirection': chatItem.upId === userId ? 'row-reverse' : 'row' }">
+                            'left-side': chatItem.upId !== userId,
+                            'right-side': chatItem.upId === userId
+                        }" :style="{ 'flexDirection': chatItem.upId === userId ? 'row-reverse' : 'row' }">
                             <ProfileCard class="chat-avatar" :avatar="currentPerson.avatar"
                                 :id="currentPerson.userId" />
                             <div :class="{
-                'chat-item-bg-other': chatItem.upId !== userId,
-                'chat-item-bg-me': chatItem.upId === userId
-            }" class="chat-item-bg chat-item-bg-other">
+                                'chat-item-bg-other': chatItem.upId !== userId,
+                                'chat-item-bg-me': chatItem.upId === userId
+                            }" class="chat-item-bg chat-item-bg-other">
                                 <p v-if="chatItem.upId !== 0">{{ chatItem.content }}</p>
                                 <div v-else>
                                     <template v-if="chatItem.type == '0'">
@@ -29,11 +29,11 @@
                                         <img :src="chatItem.imgSrc" alt="" style="width: 100%;">
                                         <template v-for="(i, index) in chatItem.content" :key="index">
                                             <h1 v-show="i.index.split('.').length == 1" style="font-size: 20px;">{{
-                i.themeName }}</h1>
+                                                i.themeName }}</h1>
                                             <h2 v-show="i.index.split('.').length == 2" style="font-size: 16px;">{{
-                i.themeName }}</h2>
+                                                i.themeName }}</h2>
                                             <p v-show="i.index.split('.').length == 2" style="font-size: 14px;">{{
-                i.text }}
+                                                i.text }}
                                             </p>
                                         </template>
                                     </template>
@@ -155,12 +155,19 @@ socket.onmessage = async (event) => {
         // })
 
         if (message.senderId == props.upId) {
-            await getData()
-            // await changeSessionTime(userId, props.upId, message.content)
-            await editChatToRead(userId, Number(props.upId))
+            setTimeout(async () => {
+                await getData()
+                // await changeSessionTime(userId, props.upId, message.content)
+                await editChatToRead(userId, Number(props.upId))
+                emits('getList')
+            }, 100);
+
         } else {
-            console.log('当前不是这个对话框');
-            emits('getList')
+            setTimeout(async () => {
+                console.log('当前不是这个对话框');
+                emits('getList')
+            }, 100)
+
             // await changeSessionTime(userId, Number(message.senderId), message.content)
 
         }
@@ -290,13 +297,7 @@ const submitReply = async () => {
                 // await changeSessionTime(userId, Number(currentPerson.value.upId), reply.value)
                 emits('getList')
                 reply.value = ''
-
-
-
             }
-
-
-
         } else {
             ElMessage.error("socket未创建或回复为空")
             console.error("socket未创建或回复为空")

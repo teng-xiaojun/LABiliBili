@@ -45,7 +45,7 @@ const menuConfig = reactive([
     icon: "Camera",
     index: `/userCenter/uploadVideo/${upId}`,
     title: "视频投稿",
-    permiss: true
+    permiss: upId == userId
   },
   {
     icon: "Compass",
@@ -63,15 +63,15 @@ const menuConfig = reactive([
 // },
 onMounted(async () => {
   // 获取权限
-  if (userId !== upId) {
-    permissData.value = await fetchPermiss(userId, upId)
-    if (permissData.value['collectGroup']) { // 为1代表false
-      menuConfig[0].subs[2].permiss = false
-    }
-    if (permissData.value['remotelyLike']) {
-      menuConfig[0].subs[3].permiss = false
-    }
-  }
+  // if (userId !== upId) {
+  //   permissData.value = await fetchPermiss(userId, upId)
+  //   if (permissData.value['collectGroup']) { // 为1代表false
+  //     menuConfig[0].subs[2].permiss = false
+  //   }
+  //   if (permissData.value['remotelyLike']) {
+  //     menuConfig[0].subs[3].permiss = false
+  //   }
+  // }
   // 使用router实现侧栏跳转
   router
   // 判断当前是否为动态和历史记录页面

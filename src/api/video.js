@@ -434,3 +434,12 @@ export const removeVideoFromCompilation = async () => {
         console.error(`将视频移出合集失败：${e}`)
     }
 }
+
+
+
+
+export const getUserInfoVideo = async (selfId, visitedId) => {
+    const res = await request.get(`/selfCenter/getPersonalCenterContent/${selfId}/${visitedId}`);
+    console.log('getUserInfoVideo', res);
+    return res;
+}

@@ -110,7 +110,7 @@ export const editChatToRead = async (senderId, receiverId) => {
     try {
         const postURL = chat + 'changeChatStatus'
         const response = await request.post(postURL, {
-            senderId: senderId,
+            userId: senderId,
             receiverId: receiverId
         })
         return response
