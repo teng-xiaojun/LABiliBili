@@ -18,29 +18,51 @@
 <script setup>
 import { onMounted, onBeforeMount, reactive } from "vue"
 import { fetchPermiss, editPermiss } from "@/api/permiss"
+import {useUserInfo} from "@/store/userInfo"
+import { onUnmounted } from "vue";
 const isEditPermiss = reactive(false) // 是否有改动权限
+const userInfo = useUserInfo()  
 // 权限配置
 const upPermiss = reactive([{
     name: "允许其他用户查看关注列表",
+    label:'idolList',
     value: false,
 },{
     name: "允许其他用户查看粉丝列表",
+    label:'fansList',
     value: false,
 },{
     name: "允许其他用户查看收藏夹",
+    label:'collectGroup',
     value: false,
 },{
     name: "允许其他用户查看最近点赞",
+    label:"remotelyLike",
     value: false,
+
 }])
+
+
+
+
 onMounted(()=>{
     // 获取权限数据
-
+ fetchPermiss(userInfo.id).then((res)=>{
+    // console.log('reeee',res);
+    upPermiss.forEach((item)=>{
+        item.value = !!res[item.label]
+    })
+ })
 })
-onBeforeMount(()=>{
-    if(isEditPermiss) {
-        editPermiss()
-    }
+onUnmounted(()=>{
+        editPermiss({
+            id:userInfo.id,
+            idolList: Number(upPermiss[0].value)  ,
+            fansList: Number(upPermiss[1].value),
+            collectGroup: Number(upPermiss[2].value),
+            remotelyLike:Number( upPermiss[3].value),
+        })
+    
 })
 </script>
 

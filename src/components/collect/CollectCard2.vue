@@ -1,6 +1,6 @@
 <!--收藏夹-->
 <template>
-  <div style="width:30rem;height:40rem;position:fixed">
+  <div style="width:30rem;height:40rem;position:fixed;z-index: 9999;">
     <el-dialog v-model="isShow" :show-close="true" :before-close="handleClose" :key="componentKey" style="
       width:30rem;
       height:40rem;

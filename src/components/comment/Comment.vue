@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div class="info-item comment-content font-third-color" style="margin-left: 50px;">{{
-                getCommentInfo.content }}</div>
+                    getCommentInfo.content }}</div>
             </div>
             <div v-else class="flex-based-container" style="height: 60px;">
                 <el-popover placement="top-start" :width="200" trigger="hover">
@@ -61,7 +61,7 @@
                 <div class="info-item comment-username">
                     <span class="font-second-color">{{ getCommentInfo.senderName }}</span> 回复 <span
                         class="font-second-color">{{
-                getCommentInfo.receiverName }}</span>
+                            getCommentInfo.receiverName }}</span>
                 </div>
                 <div class="info-item comment-content reply-content font-fifth-color">{{ getCommentInfo.content }}</div>
             </div>

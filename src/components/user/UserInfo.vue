@@ -3,14 +3,18 @@
     <div class="based-box user-info" :class="{ 'user-info-bg': isBgShow }">
         <div class="user-info-important user-info-item flex-left-container">
             <img v-if="!isEditInfo" :src="upInfo.avatar" class="common-avatar user-center-avatar" />
-            <figure v-else class="change-color-btn">
+            <figure v-else class="change-color-btn" style="position: relative;">
                 <img src="@/assets/img/user/black_user.jpeg" type="image" style="border: 1px solid #6b6b6b;"
-                    class="common-avatar user-center-avatar" @click="uploadAvatar()" />
-                <figcaption @click="uploadAvatar()">上传头像</figcaption>
+                    class="common-avatar user-center-avatar" />
+                <input type="file"
+                    style="opacity: 0; position: absolute; z-index: 99999;top: 0;left: 0;width: 100%;height: 100%;"
+                    @input="handleFileChange">
+                <figcaption>上传头像</figcaption>
             </figure>
+
             <div class=" flex-column-left-max-container user-info-text">
                 <p v-if="!isEditInfo" style="font-weight: 600; font-size: 1.2rem;">{{ upInfo.name }}</p>
-                <aInput v-else :definedPlaceholder="'请输入名称'" class="modified-input"></aInput>
+                <input v-else :placeholder="'请输入名称'" class="modified-input-name" />
                 <div class="flex-based-container">
                     <p v-if="upInfo.followingNum" style="margin-right: 1rem;" class="change-color-btn"
                         @click="isFollow = 1">关注数 {{ upInfo.followingNum }}</p>
@@ -23,7 +27,7 @@
                     <template #content>{{ upInfo.intro }}</template>
                     <p class="long-text-collapsed user-simple-intro">{{ upInfo.intro }}</p>
                 </el-tooltip>
-                <aInput v-else :placeholder="'请输入修改后的简介'" style="font-weight: 600; font-size: 1.2rem;"></aInput>
+                <input v-else :placeholder="'请输入修改后的简介'" class="modified-input-intro" />
             </div>
         </div>
         <div v-if="isConfigShow" class="user-tool user-info-item">
@@ -35,15 +39,14 @@
             <el-button type="primary" class="save-btn" @click="uploadFinal()" v-if="isConfigShow">{{ isEditInfo ? '上传' :
                 '修改信息'
                 }}</el-button>
-            <followAndMessage v-model:isFollowing="upInfo.isFollowing" :upId="upId" />
+            <followAndMessage v-model:isFollowing="upInfo.isFollowing" :upId="upId" :userInfo='upInfo2' />
         </div>
         <!--上传头像的页面-->
         <div v-if="isuploadImg" class="">
             <input id="upload-img" type="file" accept=".png, ,jpg" style="display: none" @input="handleFileChange">
         </div>
         <!--粉丝和关注列表-->
-        <followVue v-if="isFollow != 0" v-model:followType="isFollow" :upId="upId"
-            @update:follower-relationship="updateFollowType" />
+        <followVue :followType="isFollow" :upId="upId" />
     </div>
 </template>
 
@@ -78,6 +81,8 @@ const defaultUpInfo = {
     isFollowing: false,
 }
 const upInfo = ref(defaultUpInfo)
+
+const upInfo2 = ref({})
 // 能否设置
 const props = defineProps({
     isBgShow: {
@@ -101,25 +106,29 @@ const handleFileChange = (e) => {
     // 数据结构
     const fileAvatar = e.target.files[0]
     if (fileAvatar) {
-        editData.append("coverImg", fileAvatar)
+        editData.append("file", fileAvatar)
     }
 }
 const uploadFinal = () => {
     if (!isEditInfo.value) {
         isEditInfo.value = true
     } else {
-        editData.append("id", userId)
-        editData.append("intro", "测试333号")
-        editData.append("nickName", "nihao")
+        let nickname = document.getElementsByClassName("modified-input-name")[0].value;
+        let intro = document.getElementsByClassName("modified-input-intro")[0].value;
+        editData.append("userId", userId)
+        editData.append("intro", intro)
+        editData.append("nickname", nickname)
         // 上传后端
-        const postURL = 'http://labilibili.com/userInfo/editUserInfo'
+        const postURL = '/api/userInfo/editUserInfo'
         axios.post(postURL, editData, {
             headers: {
                 'Content-Type': 'application/multipart/form-data'
             }
-        }).then(res => {
+        }).then(async (res) => {
             console.log("详细结果", res)
             console.log("获取数据", res.data.data)
+            upInfo.value = await fetchUserInfo(userId, upId.value)
+
         }).catch(err => {
             console.log("错误信息", err)
         })
@@ -127,12 +136,8 @@ const uploadFinal = () => {
     }
 
 }
-// 修改数据
-const uploadAvatar = () => {
-    isuploadImg.value = true
-    let imgInput = document.getElementById("upload-img")
-    imgInput.click()
-}
+const isuploadImg = ref(false)
+
 onMounted(async () => {
 
     upId.value = props.upId
@@ -148,6 +153,14 @@ onMounted(async () => {
         console.log(`${JSON.stringify(props.upInfo)}\nuserInfo接收数据:${JSON.stringify(upInfo.value)}`)
     } else {
         upInfo.value = await fetchUserInfo(userId, upId.value)
+        console.log('4444444', upInfo.value);
+        upInfo2.value = {
+            cover: upInfo.value.avatar,
+            nickname: upInfo.value.name,
+            userId: upInfo.value.id,
+
+
+        }
     }
     console.log(`验证关注情况${upInfo.value.isFollowing}`)
 })

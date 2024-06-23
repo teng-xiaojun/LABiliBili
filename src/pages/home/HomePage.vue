@@ -220,7 +220,7 @@ onMounted(async () => {
 
 .title-notice {
   display: none;
-  margin-right: 10rem;
+  margin-right: 15rem;
   min-width: 8rem;
 }
 

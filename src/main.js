@@ -7,7 +7,7 @@ import request from "@/api/index.js"
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import zhCn from 'element-plus/es/locale/lang/zh-cn' 
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import App from './App.vue'
 import router from './router/index'
 import Particles from "vue3-particles"
@@ -16,7 +16,7 @@ import VueLazyload from "vue-lazyload"
 // import SkeletonPlugin from 'vue-skeleton-webpack-plugin'
 import errImg from "./assets/img/lazyLoad/err.png"
 import loadImg from "./assets/img/lazyLoad/loading.jpg"
-
+import "@/assets/css/danmi.scss"
 const app = createApp(App)
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
@@ -52,23 +52,23 @@ const refreshTokenStore = useRefreshToken()
 const setTokenRefresh = (expirationTime) => {
     const refreshTime = expirationTime; // 过期前一分钟刷新
     const timeout = refreshTime - Date.now();
-    setTimeout(async() => {
+    setTimeout(async () => {
         // 获取后端
         await validateToken()
         console.log("重新发送了一次短token")
         setTokenRefresh(expirationTime); // 递归设置下一次刷新
     }, timeout)
 }
-const refreshToken = async() => {
+const refreshToken = async () => {
     // 从cookie取出短token，判断是否为空
-    if(refreshTokenStore.getData()!=''||request.defaults.headers.common['shortauthorization']!='') {
+    if (refreshTokenStore.getData() != '' || request.defaults.headers.common['shortauthorization'] != '') {
         // 重新用本地的赋值
         request.defaults.headers.common['shortauthorization'] = refreshTokenStore.getData()
         await validateToken()
         // 发定时任务，请求令牌
-        const expirationTime = Date.now() + 25*60*1000 // 假设过期时间为 25 分钟：25*60*1000
+        const expirationTime = Date.now() + 25 * 60 * 1000 // 假设过期时间为 25 分钟：25*60*1000
         setTokenRefresh(expirationTime)
-    } 
+    }
 }
 // 监听
 watch(refreshTokenStore, (newValue, oldValue) => {
@@ -77,10 +77,10 @@ watch(refreshTokenStore, (newValue, oldValue) => {
         console.log('isTokenPolling 变为 true 了！')
         // 设置刷新定时器
         refreshToken()
-    } 
+    }
 })
 
 /**
  * 长轮询更新登录用户的信息和消息通知
- */  
+ */
 watch()

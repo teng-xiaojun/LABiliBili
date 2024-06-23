@@ -74,10 +74,14 @@
     <!--收藏右-->
     <div class="collect-content-right">
       <div v-if="collectVideoData.length > 0">
-        <div v-for="(content, index) in collectVideoData" :key="index">
-          <div></div><!--TODO 没写完这里-->
-          <div>
-            <p class="collect-content-title">{{ content.title }}</p>
+        <div v-for="(content, index) in collectVideoData" :key="index" class="collect-item"
+          @click.stop="psuhVideoDetail(content)">
+          <div class="left-content">
+            <img :src="content.videoCover" alt="" style="width: 100%;height: 100%;">
+          </div><!--TODO 没写完这里-->
+          <div class="right-content">
+            <p>{{ content.videoName }}</p>
+            <div class="name">作者：{{ content.authorName }}</div>
           </div>
         </div>
       </div>
@@ -94,7 +98,7 @@ import {
   onBeforeUnmount, defineAsyncComponent
 } from 'vue'
 import { getVideoSmall } from '@/api/video'
-import { fetchCollection } from "@/api/like_and_collect"
+import { fetchCollection, getCollectGroupByid } from "@/api/like_and_collect"
 import { useUserInfo } from "@/store/userInfo"
 import { editTrendToRead } from "@/api/notice"
 import { useRouter } from 'vue-router'
@@ -185,7 +189,7 @@ const getData = async () => {
 watch(currentCollectFolder, async (newValue, oldValue) => {
   console.log('收藏夹的id改变了', newValue);
   if (newValue != oldValue) {
-    collectVideoData.value = await getVideoSmall(panelType.value, userId, newValue)
+    collectVideoData.value = await getCollectGroupByid(newValue)
   }
 })
 /**
@@ -201,6 +205,14 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   changeType(trendType, trendType[0])
 })
+
+
+const psuhVideoDetail = (item) => {
+  console.log('pushVideoDetail', item);
+  router.push({
+    path: `/videoDetail/${videoId}?upId=${item.authorId}`
+  })
+}
 
 const pushMessage = (val) => {
   if (userId === 0) return router.push({ path: '/login' })
@@ -271,17 +283,19 @@ $trend-and-history-width: 23rem;
 .collect-panel {
   border-radius: 20px;
   top: 5rem;
-  right: 3rem;
+  // right: 3rem;
   width: 25rem;
   height: 25rem;
   display: flex;
 }
 
 .collect-panel .collect-folder-left {
-  flex-basis: 8rem;
-  flex-grow: 0;
-  flex-shrink: 1;
+  flex: 0.3;
   text-align: center;
+}
+
+.collect-panel .collect-content-right {
+  width: 100%;
 }
 
 .collect-folder-left>div {
@@ -292,13 +306,6 @@ $trend-and-history-width: 23rem;
   cursor: pointer;
 }
 
-.collect-content-right>div {
-  height: 5rem;
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  justify-content: center;
-}
 
 .collect-panel .collect-folder-chosen {
   border-radius: 2rem;
@@ -308,9 +315,34 @@ $trend-and-history-width: 23rem;
   color: #fff;
 }
 
-.collect-panel .collect-content-right {
-  flex-basis: 5rem;
-  flex-grow: 1;
-  flex-shrink: 1;
+.collect-item {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+
+  .left-content {
+    width: 90px;
+    height: 100%;
+  }
+
+  .right-content {
+    flex: 1;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+
+    p {
+      font-size: 16px;
+      font-weight: 700;
+    }
+  }
+
+
 }
 </style>

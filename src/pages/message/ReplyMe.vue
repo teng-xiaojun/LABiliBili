@@ -5,7 +5,7 @@
         <el-scrollbar style="height: 90%;">
             <div v-if="replyList && replyList.length > 0" class="component reply-content">
                 <!--TODO 修复成有数据的情况-->
-                <div v-for="(reply, index) in replyList" :key="index" @click="turnBackDetail(140, 1, 1)"
+                <div v-for="(reply, index) in replyList" :key="index" @click="turnBackDetail(reply)"
                     class="reply-item-wrap" style="position: relative;cursor: pointer;">
                     <!---->
                     <div class="item flex-based-container">
@@ -19,7 +19,7 @@
                             <div class="item-content">{{ reply.replyContent }}</div>
                             <div class="flex-based-container">
                                 <span class="change-color-btn">{{ reply.createTime }}</span>
-                                <span class="change-color-btn flex-based-container" style="margin-left: 0.3rem;">
+                                <!-- <span class="change-color-btn flex-based-container" style="margin-left: 0.3rem;">
                                     <p>点赞</p>
                                     <img v-if="!reply.isLike" alt="未点赞" src="@/assets/img/comment/no_thumbsUp.svg"
                                         style="width: 1rem;" />
@@ -27,16 +27,19 @@
                                         style="width: 1rem;" />
                                     <p>{{ reply.likeCount }}</p>
                                 </span>
-                                <!-- <img src="" /> -->
+                              
                                 <span class="change-color-btn" style="margin-left: 0.3rem;"
-                                    @click="replyToReply()">回复</span>
+                                    @click.stop="replyToReply()">回复</span> -->
                             </div>
                         </div>
                         <div v-if="reply.videoCover"><!--如果是视频，放封面-->
                             <img :src="reply.videoCover" class="video-cover" />
                         </div>
+                        <div v-else><!--如果是视频，放封面-->
+                            <p class="video-cover">{{ reply.replyToContent }}</p>
+                        </div>
                     </div>
-                    <div v-if="index !== replyList.length - 1" class="horizontal-divided-line"></div>
+                    <!-- <div v-if="index !== replyList.length - 1" class="horizontal-divided-line"></div> -->
                 </div>
             </div>
             <div v-else>
@@ -56,14 +59,14 @@ const replyList = ref()
 const userInfo = useUserInfo() // 使用登录信息
 const userId = userInfo.getId()
 // 跳转到视频详情页的原数据
-const turnBackDetail = (videoId, upId, commentId) => {
+const turnBackDetail = (item) => {
     const routeURL = router.resolve({
         name: 'videoDetail',
         params: {
-            videoId: videoId,
+            videoId: item.videoId,
         },
         query: {
-            upId: upId,
+            upId: item.userId,
         }
     })
     window.open(routeURL.href, '_blank')

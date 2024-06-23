@@ -12,30 +12,30 @@ export const useUserInfo = defineStore({
         // followersNum: 50
     }),
     actions: {
-        setAll(name, id, avatar){
+        setAll(name, id, avatar) {
             this.setName(name)
             this.setId(id)
             this.setAvatar(avatar)
         },
-        setName(name){
+        setName(name) {
             this.name = name
             // localStorage.setItem('name', JSON.stringify(this.name))
         },
-        getName(){
+        getName() {
             return this.name
         },
-        setId(id){
+        setId(id) {
             this.id = id
         },
-        getId(){
+        getId() {
             return this.id
         },
-        setAvatar(avatar){
+        setAvatar(avatar) {
             this.avatar = avatar
         },
-        getAvatar(){
+        getAvatar() {
             return this.avatar
         },
     },
-    persist: piniaPersistConfig('user', ['name','id','avatar'])
+    persist: piniaPersistConfig('user', ['name', 'id', 'avatar'])
 })

@@ -17,7 +17,7 @@
                         @click="turnToMyDetail(index)" />
                 </div>
                 <div class="my-single-content">
-                    <div v-show="data[index].length > 0">
+                    <div v-show="data[index] && data[index].length > 0">
                         <el-scrollbar style="width:88%;" ref="scrollbar">
                             <div class="flex-left-container" ref="chScrollbar">
                                 <div v-for="(item, subIndex) in data[index]" :key="subIndex">
@@ -49,7 +49,7 @@
 
                         </el-scrollbar>
                     </div>
-                    <div v-show="data[index].length === 0" class="flex-center-container">
+                    <div v-show="data[index] && data[index].length === 0" class="flex-center-container">
                         <img src="@/assets/img/utils/noData.png" style="width:15rem;height:15rem;" />
                     </div>
                 </div>
@@ -115,6 +115,8 @@ const getData = async (index) => {
     data.value[0] = res.selfVideoResponse;
     data.value[1] = res.selfCollectResponse;
     data.value[2] = res.remotelyLikeVideoResponse;
+    localStorage.setItem('fansListResponse', JSON.stringify(res.fansListResponse));
+    localStorage.setItem('idolListResponse', JSON.stringify(res.idolListResponse));
     console.log('33333', data.value);
 }
 // 跳转到本页面的详细

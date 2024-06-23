@@ -208,3 +208,12 @@ export const updateCollections = async (arr) => {
     let res = await request.post('/collect/collect', arr);
     return res
 }
+
+
+
+//获取某个收藏夹下的视频
+export const getCollectGroupByid = async (collectGroupId) => {
+    let res = await request.get(`/collect/getCollectVideo/${collectGroupId}`)
+    console.log('getCollectGroupByid', res);
+    return res
+}

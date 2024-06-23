@@ -1,7 +1,7 @@
 <!--页面加载的组件-->
 <template>
     <!-- <div class="loading-page bg-opacity" :style="{display:hide?'none':'block'}"> -->
-    <div class="loading-component" ><!--NOTE @dblclick双击鼠标，e.g.@dblclick="close"-->
+    <div class="loading-component"><!--NOTE @dblclick双击鼠标，e.g.@dblclick="close"-->
         <div class="la-ball-spin-clockwise la-2x">
             <div class="child-1"></div>
             <div class="child-2"></div>
@@ -32,6 +32,7 @@
     margin-left: -50px;
     text-align: center;
 }
+
 .la-ball-spin-clockwise {
     width: 64px;
     height: 64px;
@@ -43,6 +44,7 @@
     position: relative;
     box-sizing: border-box;
     animation-play-state: running;
+
     div {
         width: 16px;
         height: 16px;
@@ -57,6 +59,7 @@
         border: 0 solid currentColor;
         animation-play-state: running;
     }
+
     .child-1 {
         top: 5%;
         left: 50%;
@@ -65,6 +68,7 @@
         -o-animation-delay: -.875s;
         animation-delay: -.875s;
     }
+
     .child-2 {
         top: 18.1801948466%;
         left: 81.8198051534%;
@@ -73,6 +77,7 @@
         -o-animation-delay: -.75s;
         animation-delay: -.75s;
     }
+
     .child-3 {
         top: 50%;
         left: 95%;
@@ -81,6 +86,7 @@
         -o-animation-delay: -.625s;
         animation-delay: -.625s;
     }
+
     .child-4 {
         top: 81.8198051534%;
         left: 81.8198051534%;
@@ -89,6 +95,7 @@
         -o-animation-delay: -.5s;
         animation-delay: -.5s;
     }
+
     .child-5 {
         top: 94.9999999966%;
         left: 50.0000000005%;
@@ -97,6 +104,7 @@
         -o-animation-delay: -.375s;
         animation-delay: -.375s;
     }
+
     .child-6 {
         top: 81.8198046966%;
         left: 18.1801949248%;
@@ -105,6 +113,7 @@
         -o-animation-delay: -.25s;
         animation-delay: -.25s;
     }
+
     .child-7 {
         top: 49.9999750815%;
         left: 5.0000051215%;
@@ -113,6 +122,7 @@
         -o-animation-delay: -.125s;
         animation-delay: -.125s;
     }
+
     .child-8 {
         top: 18.179464974%;
         left: 18.1803700518%;
@@ -122,19 +132,24 @@
         animation-delay: 0s;
     }
 }
+
 @keyframes ball-spin-clockwise {
-    0%,100%{
-      opacity:1;
-      -moz-transform:scale(1);
-      transform:scale(1)
+
+    0%,
+    100% {
+        opacity: 1;
+        -moz-transform: scale(1);
+        transform: scale(1)
     }
-    20%{
-      opacity:1
+
+    20% {
+        opacity: 1
     }
-    80%{
-      opacity:0;
-      -moz-transform:scale(0);
-      transform:scale(0)
+
+    80% {
+        opacity: 0;
+        -moz-transform: scale(0);
+        transform: scale(0)
     }
 }
 </style>

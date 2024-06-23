@@ -48,7 +48,20 @@ const turnPage = (routerPath) => {
  * 具体内容分类
  */
 const sections = reactive([
-
+  {
+    type: 'trend',
+    name: "动态",
+    turnTo: "/trend",
+    icon: require("@/assets/img/trend_icon.svg"),
+    expanded: false,
+  },
+  {
+    type: 'message',
+    name: '消息',
+    turnTo: `/message/Reply/${userId}`,
+    icon: require("@/assets/img/message.svg"),
+    expanded: false,
+  },
   {
     type: 'collect',
     name: "收藏",
@@ -62,13 +75,7 @@ const sections = reactive([
     icon: require("@/assets/img/history_icon.svg"),
     expanded: false,
   },
-  {
-    type: 'message',
-    name: '消息',
-    turnTo: `/message/Reply/${userId}`,
-    icon: require("@/assets/img/message.svg"),
-    expanded: false,
-  },
+
 ])
 // 获得数据
 const getDNoticeNum = async () => {

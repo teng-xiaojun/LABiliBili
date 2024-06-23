@@ -9,19 +9,21 @@
 
 <script setup>
 import { onBeforeUnmount, onMounted, ref, defineProps, watch, onBeforeMount } from "vue"
-import { fetchDanMu } from "@/api/danmu.js"
+import { fetchDanMu, addDanmu, getDanmuList } from "@/api/danmu.js"
 import { useRoute } from 'vue-router'
-import DPlayer from "dplayer" 
+import { useUserInfo } from '@/store/userInfo'
+import DPlayer from "dplayer"
 let videoURL_ = ""
 const route = useRoute()
 const dp = ref(null) // 将存储DPlayer实例
 const videoId = route.params.videoId // 当前视频Id
+const userId = useUserInfo().id
 // 视频基本数据
 const props = defineProps({
     videoUrl: {
         type: String,
         required: true,
-        default: ""  
+        default: ""
     }
 })
 // 初始化dplayer.js实例
@@ -29,66 +31,75 @@ const initPlayer = () => {
     const opt = {
         container: document.getElementById('player'),
         autoplay: true,
-        theme: '#FADFA3',
-        loop: true,
-        lang: 'zh-cn',
-        screenshot: true,
-        hotkey: true,
-        preload: 'auto',
-        volume: 0.7,
-        mutex: true,
         video: {
-            url: videoURL_,
-            type: 'auto'
-        }
+            url: props.videoUrl,
+            type: 'auto',
+        },
+        danmaku: true,
+        apiBackend: {
+            send: function (endpoint) {
+                console.log(endpoint);
+                draw({
+                    "time": 30,
+                    "text": "1661309439313203200",
+                    "color": 16777215,
+                    "player": 'top',
+                    "type": 1,
+                    "author": "YU4324234234"
+
+                })
+                endpoint.success()
+
+
+            },
+            read: async (endpoint) => {
+                let res = await getDanmuList(videoId)
+                console.log('res', res);
+                endpoint.success(res);
+            }
+        },
+
+
     }
     dp.value = new DPlayer(opt)
     // 进行监听
 }
-// 发送弹幕
-const sendDanMu =(text, colorString) =>{
-    dp.danmaku.send({
-        text: text || '我是弹幕',
-        color: colorString || '#ff0000',
-        size: 20,
-        speed: 1000,
-        opacity: 0.5,
-    },dp.danmaku.draw({
-        text: text,
-        color: colorString
-    }))
-    // 向后端发送axios
-}
-// 删除弹幕
-const deleteDanMu = () => {
 
-}
-watch(()=>props.videoUrl, (newValue, oldValue)=>{
-    if(newValue!==''){
+
+// 发送弹幕
+watch(() => props.videoUrl, (newValue, oldValue) => {
+    if (newValue !== '') {
         videoURL_ = newValue
         initPlayer() // 等获取到再更新实例
+        dp.value.danmaku.show()
+        dp.value.danmaku.draw({
+            text: 'DIYgod is amazing',
+            color: '#fff',
+            type: 1,
+            time: 10,
+        });
     }
 })
-const danmuList = ref([])
-const getDanMuList = async()=>{
-    const danmuList_ = await fetchDanMu(videoId)
-    return danmuList_
+
+const draw = (obj) => {
+    console.log('ddssaa', dp.value.danmaku.draw);
+
+    dp.value.danmaku.draw(obj);
 }
-onBeforeMount(()=>{
+onBeforeMount(() => {
 
 })
-onMounted(()=>{
+onMounted(() => {
     // 获取弹幕数据
-    danmuList.value = getDanMuList()
+    // initPlayer()
+
 })
-onBeforeUnmount(()=>{
-    if(dp && dp.value !== null){
-      
+onBeforeUnmount(() => {
+    if (dp && dp.value !== null) {
+
         dp.value.destroy()
-    }  
+    }
 })
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
